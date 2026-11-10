@@ -4,13 +4,13 @@
     "name": "Custom Car Model",
     "desc": "Swap the in-game car for your own GLTF/GLB model.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/glb_gtlf_loader.js"
+    "url": "https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/mods/glb_gtlf_loader.js"
   },
   {
     "id": "squash_stretch",
     "name": "Squash & Stretch",
-    "desc": "Makes your custom car bounce and stretch like the toyota yaris.",
+    "desc": "Makes your custom car bounce and stretch like a cartoon.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/squash_stretch.js"
+    "url": "https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/mods/squash_stretch.js"
   }
 ]
