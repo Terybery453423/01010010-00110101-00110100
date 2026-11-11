@@ -103,8 +103,6 @@
   chip.onclick = function(){
     if (window.__r52bridgeStash) return;
     chip.textContent = '⏳ REQUESTING';
-    
-    // Call the Hub's native download function
     if (window.__r52DownloadFile) {
       window.__r52DownloadFile(BRIDGE_URL, 'bridge', function(dataUrl) {
         chip.textContent = '⏳ PARSING';
@@ -141,6 +139,7 @@
     clearInterval(intervalId); clearInterval(checkInterval);
     if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
     if (window.__r52unswapBridge) window.__r52unswapBridge();
+    delete window.__r52_bridgeMod; // Fixes the reinstall bug!
     console.log("[Mod] Bridge cleaned up natively.");
   };
 
