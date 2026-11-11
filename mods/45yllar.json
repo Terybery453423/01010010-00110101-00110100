@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "soft_barriers",
+    "name": "Soft Barriers",
+    "desc": "Halves the speed penalty when you crash into walls.",
+    "author": "Anonymous",
+    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/soft_barriers.js"
+  },
+  {
+    "id": "trippy",
+    "name": "Trippy Paint",
+    "desc": "Generates crazy neon patterns and uploads them directly to your profile.",
+    "author": "Terybery453423",
+    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/trippy.js"
+  }
+]
