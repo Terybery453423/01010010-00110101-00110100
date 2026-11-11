@@ -5,10 +5,8 @@
 
   console.log("[Mod] Bridge loaded");
 
-  // Swapped to jsDelivr so CORS never blocks the GLTFLoader
   const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/custom_cars/Golden_Gate_Bridge.glb';
 
-  // UNIQUE VARIABLES so it doesn't break the Custom Model Loader!
   window.__r52bridgeStash = null;
   window.__r52bridgeBaked = null;
   window.__r52bridgeSwapMsg = "idle";
@@ -35,10 +33,8 @@
   }
 
   var intervalId = setInterval(function(){
-    var sc = getScene();
-    if (!sc) return;
-    var cg = findCarGroup(sc);
-    if (!cg) return;
+    var sc = getScene(); if (!sc) return;
+    var cg = findCarGroup(sc); if (!cg) return;
     var scaled = null;
     for (var j = 0; j < cg.children.length; j++) {
       var ch = cg.children[j];
@@ -46,7 +42,6 @@
     }
     if (!scaled) scaled = cg.children[0];
     if (!scaled) return;
-    
     if (!window.__r52bridgeStash) return;
 
     if (!window.__r52bridgeBaked) {
@@ -75,37 +70,22 @@
       if (cg.children[i].name === "__r52bridgeWrap") { existing = cg.children[i]; break; }
     }
     if (existing) {
-      existing.position.x = scaled.position.x;
-      existing.position.y = scaled.position.y + window.__r52bridgeYOffset;
-      existing.position.z = scaled.position.z;
+      existing.position.x = scaled.position.x; existing.position.y = scaled.position.y + window.__r52bridgeYOffset; existing.position.z = scaled.position.z;
       existing.rotation.set(window.__r52bridgeRotX, window.__r52bridgeRotY, 0);
-      existing.userData.baseScale = 0.01;
-      scaled.visible = false;
-      window.__r52bridgeSwapMsg = "live";
-      return;
+      existing.userData.baseScale = 0.01; scaled.visible = false; window.__r52bridgeSwapMsg = "live"; return;
     }
 
     try {
-      var wrap = new THREE.Group();
-      wrap.name = "__r52bridgeWrap";
-      wrap.position.x = scaled.position.x;
-      wrap.position.y = scaled.position.y + window.__r52bridgeYOffset;
-      wrap.position.z = scaled.position.z;
+      var wrap = new THREE.Group(); wrap.name = "__r52bridgeWrap";
+      wrap.position.x = scaled.position.x; wrap.position.y = scaled.position.y + window.__r52bridgeYOffset; wrap.position.z = scaled.position.z;
       wrap.rotation.set(window.__r52bridgeRotX, window.__r52bridgeRotY, 0);
-      wrap.scale.setScalar(0.01);
-      wrap.userData.baseScale = 0.01;
+      wrap.scale.setScalar(0.01); wrap.userData.baseScale = 0.01;
       var model2 = window.__r52bridgeStash;
       if (model2.parent) model2.parent.remove(model2);
-      model2.scale.set(b.k, b.k, b.k);
-      model2.position.set(b.x, b.y, b.z);
-      wrap.add(model2);
-      cg.add(wrap);
-      scaled.visible = false;
-      window.__r52bridgeGroup = wrap;
-      window.__r52bridgeSwapMsg = "live";
-    } catch(e) {
-      window.__r52bridgeSwapMsg = "err: " + e.message;
-    }
+      model2.scale.set(b.k, b.k, b.k); model2.position.set(b.x, b.y, b.z);
+      wrap.add(model2); cg.add(wrap); scaled.visible = false;
+      window.__r52bridgeGroup = wrap; window.__r52bridgeSwapMsg = "live";
+    } catch(e) { window.__r52bridgeSwapMsg = "err: " + e.message; }
   }, 300);
 
   window.__r52unswapBridge = function(){
@@ -114,33 +94,44 @@
     window.__r52bridgeSwapMsg = "idle";
   };
 
-  // --- UI ---
   var chip = document.createElement('div');
   chip.id = 'r52bridge_chip';
   chip.style.cssText = 'position:fixed;right:6px;bottom:260px;z-index:9999;padding:9px 14px;background:#a0472f;color:#fff;font:700 11px monospace;border-radius:8px;cursor:pointer;text-align:center;min-width:130px;border:1px solid #d88;-webkit-tap-highlight-color:transparent';
   chip.textContent = '🌉 LOAD BRIDGE';
   document.body.appendChild(chip);
 
+  // Listen for the Hub's downloaded file
+  document.addEventListener('r52-download-ready', function(e) {
+    if (e.detail.id === 'bridge') {
+      var dataUrl = e.detail.dataUrl;
+      if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ LOADER MISSING'; return; }
+      
+      var loader = new THREE.GLTFLoader();
+      loader.load(dataUrl, function(gltf){
+        window.__r52bridgeStash = gltf.scene;
+        window.__r52bridgeSwapMsg = "queued";
+      }, undefined, function(err){
+        var m = (err && (err.message || err.type)) || String(err);
+        chip.textContent = '❌ PARSE ERR';
+        console.error("Bridge Parse Error:", err);
+      });
+    }
+  });
+
+  document.addEventListener('r52-download-error', function(e) {
+    if (e.detail.id === 'bridge') {
+      chip.textContent = '❌ ' + e.detail.error;
+    }
+  });
+
   chip.onclick = function(){
     if (window.__r52bridgeStash) return;
-    window.__r52bridgeSwapMsg = "downloading...";
-    chip.textContent = '⏳ DOWNLOADING';
+    chip.textContent = '⏳ REQUESTING';
     
-    if (!window.THREE || !THREE.GLTFLoader) { 
-      window.__r52bridgeSwapMsg = "GLTFLoader missing"; 
-      chip.textContent = '❌ LOADER MISSING';
-      return; 
-    }
-    
-    var loader = new THREE.GLTFLoader();
-    loader.load(BRIDGE_URL, function(gltf){
-      window.__r52bridgeStash = gltf.scene;
-      window.__r52bridgeSwapMsg = "queued";
-    }, undefined, function(err){
-      var m = (err && (err.message || err.type)) || String(err);
-      window.__r52bridgeSwapMsg = "err: " + m;
-      chip.textContent = '❌ DOWNLOAD FAILED';
-    });
+    // Ask the Hub to download it using the CSP bypass!
+    document.dispatchEvent(new CustomEvent('r52-request-download', { 
+      detail: { url: BRIDGE_URL, id: 'bridge' } 
+    }));
   };
 
   var wiped = false;
@@ -149,22 +140,16 @@
     if (window.__r52bridgeSwapMsg === 'live') {
       wiped = true;
       chip.textContent = '✓ BRIDGE ACTIVE';
-      chip.style.background = '#2a7f4f';
-      chip.style.borderColor = '#8f8';
-      setTimeout(function(){
-        if (chip.parentNode) chip.parentNode.removeChild(chip);
-      }, 2000);
+      chip.style.background = '#2a7f4f'; chip.style.borderColor = '#8f8';
+      setTimeout(function(){ if (chip.parentNode) chip.parentNode.removeChild(chip); }, 2000);
     }
   }, 600);
 
-  // --- CLEANUP LISTENER (For Mod Hub) ---
   window.addEventListener('r52-mod-disabled', function(e) {
     if (e.detail === 'bridge') {
-      clearInterval(intervalId);
-      clearInterval(checkInterval);
+      clearInterval(intervalId); clearInterval(checkInterval);
       if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
       if (window.__r52unswapBridge) window.__r52unswapBridge();
-      console.log("[Mod] Bridge disabled via Hub.");
     }
   });
 
