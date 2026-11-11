@@ -15,8 +15,9 @@ Instead of installing a bunch of separate Tampermonkey scripts, this gives you a
 ### Installation
 1. Install a userscript manager for your browser (Tampermonkey, Userscripts for iOS, etc).
 2. Copy the [Mod Hub Loader script](https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt).
-3. Open RALLY52, go to Settings, and tap "Settings" exactly 5 times.
-4. The MODS and FIXES tabs will appear. Open MODS to browse the store.
+3. Paste the script into Tampermonkey, or other userscript manager and save
+4. Open RALLY52, go to Settings, and tap "Settings" exactly 5 times.
+5. The MODS and FIXES tabs will appear. Open MODS to browse the store.
 
 ### Available Mods
 - **Custom Model Loader** (`glb_gtlf_loader`) - Swaps the default car for your own 3D model.
