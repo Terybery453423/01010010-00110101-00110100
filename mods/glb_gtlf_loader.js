@@ -28,12 +28,9 @@
     return null;
   }
 
-  setInterval(function(){
-    var sc = getScene();
-    if (!sc) return;
-    var cg = findCarGroup(sc);
-    if (!cg) return;
-
+  var intervalId = setInterval(function(){
+    var sc = getScene(); if (!sc) return;
+    var cg = findCarGroup(sc); if (!cg) return;
     var scaled = null;
     for (var j = 0; j < cg.children.length; j++) {
       var ch = cg.children[j];
@@ -41,7 +38,6 @@
     }
     if (!scaled) scaled = cg.children[0];
     if (!scaled) return;
-
     if (!window.__r52stash) return;
 
     if (!window.__r52baked) {
@@ -70,38 +66,21 @@
     }
 
     if (existing) {
-      existing.position.copy(scaled.position);
-      existing.rotation.copy(scaled.rotation);
-      existing.rotation.y += window.__r52rotY;
-      existing.userData.baseScale = 0.01;
-      scaled.visible = false;
-      window.__r52swapMsg = "live";
-      return;
+      existing.position.copy(scaled.position); existing.rotation.copy(scaled.rotation);
+      existing.rotation.y += window.__r52rotY; existing.userData.baseScale = 0.01;
+      scaled.visible = false; window.__r52swapMsg = "live"; return;
     }
 
     try {
-      var wrap = new THREE.Group();
-      wrap.name = "__r52customWrap";
-      wrap.position.copy(scaled.position);
-      wrap.rotation.copy(scaled.rotation);
-      wrap.rotation.y += window.__r52rotY;
-      wrap.scale.setScalar(0.01);
-      wrap.userData.baseScale = 0.01;
-
+      var wrap = new THREE.Group(); wrap.name = "__r52customWrap";
+      wrap.position.copy(scaled.position); wrap.rotation.copy(scaled.rotation);
+      wrap.rotation.y += window.__r52rotY; wrap.scale.setScalar(0.01); wrap.userData.baseScale = 0.01;
       var model2 = window.__r52stash;
       if (model2.parent) model2.parent.remove(model2);
-      model2.scale.set(b.k, b.k, b.k);
-      model2.position.set(b.x, b.y, b.z);
-
-      wrap.add(model2);
-      cg.add(wrap);
-      scaled.visible = false;
-      window.__r52customGroup = wrap;
-      window.__r52custom = model2;
-      window.__r52swapMsg = "live";
-    } catch(e) {
-      window.__r52swapMsg = "err: " + e.message;
-    }
+      model2.scale.set(b.k, b.k, b.k); model2.position.set(b.x, b.y, b.z);
+      wrap.add(model2); cg.add(wrap); scaled.visible = false;
+      window.__r52customGroup = wrap; window.__r52custom = model2; window.__r52swapMsg = "live";
+    } catch(e) { window.__r52swapMsg = "err: " + e.message; }
   }, 300);
 
   window.__r52unswap = function(){
@@ -111,7 +90,6 @@
     try { var sc = window.__r52sceneCached || getScene(); if (sc) { for (var k = 0; k < sc.children.length; k++) { var c = sc.children[k]; if (c.type === "Group" && c.userData && c.userData.base) { for (var j = 0; j < c.children.length; j++) { if (c.children[j].scale && Math.abs(c.children[j].scale.x - 0.01) < 0.001) { c.children[j].visible = true; break; } } } } } } catch(e){}
   };
 
-  // --- UI ---
   var chip = document.createElement('div');
   chip.id = 'r52cf_chip';
   chip.style.cssText = 'position:fixed;right:6px;bottom:260px;z-index:9999;padding:9px 14px;background:#a0472f;color:#fff;font:700 11px monospace;border-radius:8px;cursor:pointer;text-align:center;min-width:130px;border:1px solid #d88;-webkit-tap-highlight-color:transparent';
@@ -119,57 +97,47 @@
   document.body.appendChild(chip);
 
   var inp = document.createElement('input');
-  inp.type = 'file';
-  inp.accept = '*/*';
+  inp.type = 'file'; inp.accept = '*/*';
   inp.style.cssText = 'position:fixed;right:6px;bottom:260px;width:140px;height:38px;opacity:0.001;z-index:9998';
   document.body.appendChild(inp);
 
-  chip.onclick = function(){
-    window.__r52swapMsg = "picking…";
-    inp.click();
-  };
+  chip.onclick = function(){ window.__r52swapMsg = "picking…"; inp.click(); };
 
   inp.addEventListener('change', function(e){
-    var f = e.target.files && e.target.files[0];
-    if (!f) return;
-    window.__r52swapMsg = "reading file…";
-    window.__r52baked = null; window.__r52stash = null;
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    window.__r52swapMsg = "reading file…"; window.__r52baked = null; window.__r52stash = null;
     var ext = (f.name.split('.').pop() || '').toLowerCase();
     var mime = ext === 'gltf' ? 'model/gltf+json' : 'model/gltf-binary';
     var wrapped = new Blob([f], { type: mime });
     var r = new FileReader();
     r.onload = function(ev){
-      var dataUrl = ev.target.result;
-      window.__r52swapMsg = "loading model…";
-      var url = dataUrl;
-      var name = f.name;
+      var dataUrl = ev.target.result; window.__r52swapMsg = "loading model…";
       if (!window.THREE || !THREE.GLTFLoader) { window.__r52swapMsg = "GLTFLoader missing"; return; }
       var loader = new THREE.GLTFLoader();
-      loader.load(url, function(gltf){
-        window.__r52stash = gltf.scene;
-        window.__r52stashName = name;
-        window.__r52swapMsg = "queued";
-      }, undefined, function(err){
-        var m = (err && (err.message || err.type)) || String(err);
-        window.__r52swapMsg = "parse err: " + m;
-      });
+      loader.load(dataUrl, function(gltf){ window.__r52stash = gltf.scene; window.__r52stashName = f.name; window.__r52swapMsg = "queued"; }, undefined, function(err){ window.__r52swapMsg = "parse err: " + ((err && err.message) || err); });
     };
     r.onerror = function(){ window.__r52swapMsg = "file read failed"; };
     r.readAsDataURL(wrapped);
   });
 
   var uiKilled = false;
-  setInterval(function(){
+  var checkInterval = setInterval(function(){
     if (uiKilled) return;
     if (window.__r52swapMsg === 'live') {
-      uiKilled = true;
-      chip.textContent = '✓ loaded';
-      chip.style.background = '#2a7f4f';
-      chip.style.borderColor = '#8f8';
-      setTimeout(function(){
-        if (chip.parentNode) chip.parentNode.removeChild(chip);
-        if (inp.parentNode) inp.parentNode.removeChild(inp);
-      }, 2500);
+      uiKilled = true; chip.textContent = '✓ loaded'; chip.style.background = '#2a7f4f'; chip.style.borderColor = '#8f8';
+      setTimeout(function(){ if (chip.parentNode) chip.parentNode.removeChild(chip); if (inp.parentNode) inp.parentNode.removeChild(inp); }, 2500);
     }
   }, 600);
+
+  // --- NATIVE CLEANUP REGISTRY ---
+  window.__r52ModCleanup = window.__r52ModCleanup || {};
+  window.__r52ModCleanup['glb_gltf_loader'] = function() {
+    clearInterval(intervalId); clearInterval(checkInterval);
+    if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
+    if (inp && inp.parentNode) inp.parentNode.removeChild(inp);
+    if (window.__r52unswap) window.__r52unswap();
+    delete window.__r52_modelLoader; // Fixes reinstall bug!
+    console.log("[Mod] Custom Model Loader cleaned up natively.");
+  };
+
 })();
