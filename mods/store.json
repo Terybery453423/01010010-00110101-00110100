@@ -33,5 +33,19 @@
   "desc": "⚠️ HIGH LAG RISK. Replaces the UI with neon pinks and cyans.",
   "author": "Terybery453423",
   "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/synthwave_theme.js"
-  }
+  },
+  {
+  "id": "oled_theme",
+  "name": "OLED Theme",
+  "desc": "True black backgrounds, crisp white UI, no scanlines. Saves battery.",
+  "author": "Terybery453423",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/oled_theme.js"
+   },
+   {
+  "id": "crimson_theme",
+  "name": "Crimson Theme",
+  "desc": "Dark blood-red aesthetic with a neon red glow.",
+  "author": "Terybery453423",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/crimson_theme.js"
+   } 
 ]
