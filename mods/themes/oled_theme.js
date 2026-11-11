@@ -9,16 +9,16 @@
   style.id = 'r52-theme-oled';
   style.textContent = `
     :root {
-      --red: #ffffff !important;
-      --redL: #cccccc !important;
-      --redD: #888888 !important;
+      --red: #222222 !important;          /* Dark gray for buttons */
+      --redL: #444444 !important;         /* Lighter gray for hover */
+      --redD: #000000 !important;
       --card: rgba(0, 0, 0, 0.95) !important;
       --card2: #0a0a0a !important;
-      --card3: #141414 !important;
+      --card3: #1a1a1a !important;
       --line: rgba(255, 255, 255, 0.15) !important;
       --line2: rgba(255, 255, 255, 0.3) !important;
       --ink: #ffffff !important;
-      --mute: #888888 !important;
+      --mute: #aaaaaa !important;
     }
 
     body, html, #title, #hub, #garage, #opts, .ov {
@@ -26,23 +26,24 @@
     }
 
     .btn, .mi.sel, .carCard.sel, #bGo, .btn.pri {
-      background: #ffffff !important;
-      color: #000000 !important;
+      background: #222222 !important;
+      color: #ffffff !important;
       box-shadow: none !important;
-      border: none !important;
+      border: 1px solid #444 !important;
     }
-
-    .btn2, .orow {
+    
+    .btn2, .orow, .box {
       background: #0a0a0a !important;
       border-color: #222 !important;
+      color: #ffffff !important;
     }
 
-    h1, h2, h3, .bName, .gName, .logoSvg {
+    /* Force text to white */
+    h1, h2, h3, .bName, .gName, .logoSvg, span, b, .mi {
       color: #ffffff !important;
       text-shadow: none !important;
     }
 
-    /* Remove scanlines for a pure OLED look */
     #crt {
       display: none !important;
     }
