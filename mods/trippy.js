@@ -304,50 +304,56 @@
   chip.textContent = '🌀 TRIPPY';
   document.body.appendChild(chip);
 
-  var panel = document.createElement('div');
-  panel.id = 'r52tpPanel';
-  // MOVED TO TOP 10% SO IT DOESN'T COVER BUTTONS
-  panel.style.cssText = 'position:fixed;top:10%;left:50%;transform:translateX(-50%);z-index:999999;background:rgba(14,16,20,0.95);border:2px solid #f8f;border-radius:12px;padding:15px;display:none;flex-direction:column;align-items:center;gap:10px;width:90%;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.9);';
-  document.body.appendChild(panel);
+  // --- TOP PREVIEW BOX ---
+  var previewBox = document.createElement('div');
+  previewBox.id = 'r52tpPreview';
+  previewBox.style.cssText = 'position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:999999;background:rgba(14,16,20,0.95);border:2px solid #f8f;border-radius:12px;padding:10px;display:none;flex-direction:column;align-items:center;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,0.9);pointer-events:auto;';
+  document.body.appendChild(previewBox);
 
   var title = document.createElement('div');
   title.textContent = '🌀 TRIPPY PATTERN';
   title.style.cssText = 'color:#f8f;font:800 14px monospace;letter-spacing:0.1em;';
-  panel.appendChild(title);
-
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:6px;width:100%;';
-  panel.appendChild(btnRow);
-
-  var applyBtn = document.createElement('div');
-  applyBtn.textContent = '✓ APPLY';
-  applyBtn.style.cssText = 'flex:1;padding:10px;background:#1f7d4a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #4ade80;text-align:center;';
-  btnRow.appendChild(applyBtn);
-
-  var rollBtn = document.createElement('div');
-  rollBtn.textContent = '🎲 NEW';
-  rollBtn.style.cssText = 'flex:1;padding:10px;background:#4a2a7a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #c8f;text-align:center;';
-  btnRow.appendChild(rollBtn);
-
-  var modeBtn = document.createElement('div');
-  modeBtn.textContent = 'MODE 0';
-  modeBtn.style.cssText = 'flex:1;padding:10px;background:#2a4a7a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #8cf;text-align:center;';
-  btnRow.appendChild(modeBtn);
-
-  var closeBtn = document.createElement('div');
-  closeBtn.textContent = '✕';
-  closeBtn.style.cssText = 'padding:10px 12px;background:#5a2a2a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #ef4444;text-align:center;';
-  btnRow.appendChild(closeBtn);
+  previewBox.appendChild(title);
 
   var previewCanvas = document.createElement('canvas');
   previewCanvas.width = 212; previewCanvas.height = 186;
   previewCanvas.style.cssText = 'width:212px;height:186px;image-rendering:pixelated;border:1px solid #333;border-radius:6px;background:#000;';
-  panel.appendChild(previewCanvas);
+  previewBox.appendChild(previewCanvas);
 
   var infoEl = document.createElement('div');
   infoEl.style.cssText = 'color:#aaa;font:600 10px monospace;text-align:center;min-height:14px;';
   infoEl.textContent = 'Generating...';
-  panel.appendChild(infoEl);
+  previewBox.appendChild(infoEl);
+
+  // --- BOTTOM CONTROLS BOX ---
+  var controlsBox = document.createElement('div');
+  controlsBox.id = 'r52tpControls';
+  controlsBox.style.cssText = 'position:fixed;bottom:15%;left:50%;transform:translateX(-50%);z-index:999999;background:rgba(14,16,20,0.95);border:2px solid #f8f;border-radius:12px;padding:10px;display:none;flex-direction:column;gap:8px;width:min(90vw, 300px);box-shadow:0 10px 30px rgba(0,0,0,0.9);pointer-events:auto;';
+  document.body.appendChild(controlsBox);
+
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:6px;width:100%;';
+  controlsBox.appendChild(btnRow);
+
+  var applyBtn = document.createElement('div');
+  applyBtn.textContent = '✓ APPLY';
+  applyBtn.style.cssText = 'flex:1;padding:12px;background:#1f7d4a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #4ade80;text-align:center;';
+  btnRow.appendChild(applyBtn);
+
+  var rollBtn = document.createElement('div');
+  rollBtn.textContent = '🎲 NEW';
+  rollBtn.style.cssText = 'flex:1;padding:12px;background:#4a2a7a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #c8f;text-align:center;';
+  btnRow.appendChild(rollBtn);
+
+  var modeBtn = document.createElement('div');
+  modeBtn.textContent = 'MODE 0';
+  modeBtn.style.cssText = 'flex:1;padding:12px;background:#2a4a7a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #8cf;text-align:center;';
+  btnRow.appendChild(modeBtn);
+
+  var closeBtn = document.createElement('div');
+  closeBtn.textContent = '✕ CLOSE';
+  closeBtn.style.cssText = 'width:100%;padding:10px;background:#5a2a2a;color:#fff;font:800 12px monospace;border-radius:6px;cursor:pointer;border:2px solid #ef4444;text-align:center;';
+  controlsBox.appendChild(closeBtn);
 
   // --- UI LOGIC ---
   function regen() {
@@ -386,12 +392,15 @@
 
   chip.onclick = function() {
     if (busy) return;
-    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
-    if (panel.style.display === 'flex' && !currentCanvas) regen();
+    var isHidden = previewBox.style.display === 'none';
+    previewBox.style.display = isHidden ? 'flex' : 'none';
+    controlsBox.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden && !currentCanvas) regen();
   };
 
   closeBtn.onclick = function() {
-    panel.style.display = 'none';
+    previewBox.style.display = 'none';
+    controlsBox.style.display = 'none';
   };
 
   // --- NATIVE CLEANUP REGISTRY ---
@@ -399,7 +408,8 @@
   window.__r52ModCleanup['trippy'] = function() {
     window.fetch = originalFetch; // Restore fetch hook
     if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
-    if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+    if (previewBox && previewBox.parentNode) previewBox.parentNode.removeChild(previewBox);
+    if (controlsBox && controlsBox.parentNode) controlsBox.parentNode.removeChild(controlsBox);
     delete window.__r52_trippyMod;
     console.log("[Mod] Trippy cleaned up natively.");
   };
