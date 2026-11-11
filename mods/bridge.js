@@ -5,17 +5,17 @@
 
   console.log("[Mod] Bridge loaded");
 
-  window.__r52stash = null;
-  window.__r52stashName = null;
-  window.__r52swapMsg = "idle";
-  window.__r52rotY = -Math.PI * 0.75;
-  window.__r52rotX = 5 * Math.PI / 180;
-  window.__r52baked = null;
-  window.__r52bridgeScaleMul = 100.0;
-  window.__r52yOffset = -12;
+  // Swapped to jsDelivr so CORS never blocks the GLTFLoader
+  const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/custom_cars/Golden_Gate_Bridge.glb';
 
-  // The Raw GitHub URL for the GLB file
-  const BRIDGE_URL = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/custom_cars/Golden_Gate_Bridge.glb';
+  // UNIQUE VARIABLES so it doesn't break the Custom Model Loader!
+  window.__r52bridgeStash = null;
+  window.__r52bridgeBaked = null;
+  window.__r52bridgeSwapMsg = "idle";
+  window.__r52bridgeRotY = -Math.PI * 0.75;
+  window.__r52bridgeRotX = 5 * Math.PI / 180;
+  window.__r52bridgeScaleMul = 100.0;
+  window.__r52bridgeYOffset = -12;
 
   function getScene(){
     if (window.__r52sceneCached && window.__r52sceneCached.type === "Scene") return window.__r52sceneCached;
@@ -46,14 +46,15 @@
     }
     if (!scaled) scaled = cg.children[0];
     if (!scaled) return;
-    if (!window.__r52stash) return;
+    
+    if (!window.__r52bridgeStash) return;
 
-    if (!window.__r52baked) {
+    if (!window.__r52bridgeBaked) {
       try {
         var origBox = new THREE.Box3().setFromObject(scaled);
         var origSize = origBox.getSize(new THREE.Vector3());
         var origLongest = Math.max(origSize.x, origSize.y, origSize.z);
-        var model = window.__r52stash;
+        var model = window.__r52bridgeStash;
         var box = new THREE.Box3().setFromObject(model);
         var size = box.getSize(new THREE.Vector3());
         var longest = Math.max(size.x, size.y, size.z) || 1;
@@ -62,56 +63,55 @@
         model.scale.set(k, k, k);
         var box2 = new THREE.Box3().setFromObject(model);
         var center = box2.getCenter(new THREE.Vector3());
-        window.__r52baked = { k: k, x: -center.x, y: -box2.min.y, z: -center.z };
-        model.position.set(window.__r52baked.x, window.__r52baked.y, window.__r52baked.z);
-        window.__r52swapMsg = "baked k=" + k.toFixed(4);
-      } catch(e) { window.__r52swapMsg = "bake err: " + e.message; return; }
+        window.__r52bridgeBaked = { k: k, x: -center.x, y: -box2.min.y, z: -center.z };
+        model.position.set(window.__r52bridgeBaked.x, window.__r52bridgeBaked.y, window.__r52bridgeBaked.z);
+        window.__r52bridgeSwapMsg = "baked k=" + k.toFixed(4);
+      } catch(e) { window.__r52bridgeSwapMsg = "bake err: " + e.message; return; }
     }
-    var b = window.__r52baked;
+    var b = window.__r52bridgeBaked;
 
     var existing = null;
     for (var i = 0; i < cg.children.length; i++) {
-      if (cg.children[i].name === "__r52customWrap") { existing = cg.children[i]; break; }
+      if (cg.children[i].name === "__r52bridgeWrap") { existing = cg.children[i]; break; }
     }
     if (existing) {
       existing.position.x = scaled.position.x;
-      existing.position.y = scaled.position.y + window.__r52yOffset;
+      existing.position.y = scaled.position.y + window.__r52bridgeYOffset;
       existing.position.z = scaled.position.z;
-      existing.rotation.set(window.__r52rotX, window.__r52rotY, 0);
+      existing.rotation.set(window.__r52bridgeRotX, window.__r52bridgeRotY, 0);
       existing.userData.baseScale = 0.01;
       scaled.visible = false;
-      window.__r52swapMsg = "live";
+      window.__r52bridgeSwapMsg = "live";
       return;
     }
 
     try {
       var wrap = new THREE.Group();
-      wrap.name = "__r52customWrap";
+      wrap.name = "__r52bridgeWrap";
       wrap.position.x = scaled.position.x;
-      wrap.position.y = scaled.position.y + window.__r52yOffset;
+      wrap.position.y = scaled.position.y + window.__r52bridgeYOffset;
       wrap.position.z = scaled.position.z;
-      wrap.rotation.set(window.__r52rotX, window.__r52rotY, 0);
+      wrap.rotation.set(window.__r52bridgeRotX, window.__r52bridgeRotY, 0);
       wrap.scale.setScalar(0.01);
       wrap.userData.baseScale = 0.01;
-      var model2 = window.__r52stash;
+      var model2 = window.__r52bridgeStash;
       if (model2.parent) model2.parent.remove(model2);
       model2.scale.set(b.k, b.k, b.k);
       model2.position.set(b.x, b.y, b.z);
       wrap.add(model2);
       cg.add(wrap);
       scaled.visible = false;
-      window.__r52customGroup = wrap;
-      window.__r52custom = model2;
-      window.__r52swapMsg = "live";
+      window.__r52bridgeGroup = wrap;
+      window.__r52bridgeSwapMsg = "live";
     } catch(e) {
-      window.__r52swapMsg = "err: " + e.message;
+      window.__r52bridgeSwapMsg = "err: " + e.message;
     }
   }, 300);
 
-  window.__r52unswap = function(){
-    if (window.__r52customGroup && window.__r52customGroup.parent) window.__r52customGroup.parent.remove(window.__r52customGroup);
-    window.__r52customGroup = null; window.__r52custom = null; window.__r52stash = null; window.__r52baked = null;
-    window.__r52swapMsg = "idle";
+  window.__r52unswapBridge = function(){
+    if (window.__r52bridgeGroup && window.__r52bridgeGroup.parent) window.__r52bridgeGroup.parent.remove(window.__r52bridgeGroup);
+    window.__r52bridgeGroup = null; window.__r52bridgeStash = null; window.__r52bridgeBaked = null;
+    window.__r52bridgeSwapMsg = "idle";
   };
 
   // --- UI ---
@@ -122,24 +122,23 @@
   document.body.appendChild(chip);
 
   chip.onclick = function(){
-    if (window.__r52stash) return; // already loading/loaded
-    window.__r52swapMsg = "downloading...";
+    if (window.__r52bridgeStash) return;
+    window.__r52bridgeSwapMsg = "downloading...";
     chip.textContent = '⏳ DOWNLOADING';
     
     if (!window.THREE || !THREE.GLTFLoader) { 
-      window.__r52swapMsg = "GLTFLoader missing"; 
+      window.__r52bridgeSwapMsg = "GLTFLoader missing"; 
       chip.textContent = '❌ LOADER MISSING';
       return; 
     }
     
     var loader = new THREE.GLTFLoader();
     loader.load(BRIDGE_URL, function(gltf){
-      window.__r52stash = gltf.scene;
-      window.__r52stashName = "Golden_Gate_Bridge";
-      window.__r52swapMsg = "queued";
+      window.__r52bridgeStash = gltf.scene;
+      window.__r52bridgeSwapMsg = "queued";
     }, undefined, function(err){
       var m = (err && (err.message || err.type)) || String(err);
-      window.__r52swapMsg = "parse err: " + m;
+      window.__r52bridgeSwapMsg = "err: " + m;
       chip.textContent = '❌ DOWNLOAD FAILED';
     });
   };
@@ -147,7 +146,7 @@
   var wiped = false;
   var checkInterval = setInterval(function(){
     if (wiped) return;
-    if (window.__r52swapMsg === 'live') {
+    if (window.__r52bridgeSwapMsg === 'live') {
       wiped = true;
       chip.textContent = '✓ BRIDGE ACTIVE';
       chip.style.background = '#2a7f4f';
@@ -164,7 +163,7 @@
       clearInterval(intervalId);
       clearInterval(checkInterval);
       if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
-      if (window.__r52unswap) window.__r52unswap();
+      if (window.__r52unswapBridge) window.__r52unswapBridge();
       console.log("[Mod] Bridge disabled via Hub.");
     }
   });
