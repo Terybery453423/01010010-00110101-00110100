@@ -36,3 +36,11 @@ Want to add a mod?
 
 ### Disclaimer
 This project is fan-made and not affiliated with the developers of RALLY52. Use mods at your own risk. Client-side mods are generally safe, but game updates can break functionality at any time. Don't use mods to ruin the experience for other players.
+
+
+
+
+### License
+This project is licensed under the GNU General Public License v3.0 (GPLv3). See the [LICENSE](LICENSE) file for details. 
+
+*Note: This license applies to the Mod Hub loader itself. Individual mods submitted to the `/mods` folder remain the intellectual property of their respective creators unless otherwise specified.*
