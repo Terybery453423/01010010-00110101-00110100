@@ -19,10 +19,9 @@
   "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/buff_1_02x.js"
    },
    {
-    "id": "trippy",
-    "name": "Trippy Paint",
-    "desc": "Generates crazy neon patterns and uploads them directly to your profile.",
-    "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/trippy.js"
-  }
+  "id": "more_tries",
+  "name": "More Tries (Guest)",
+  "desc": "Extra tries on the guest account, NOT your main. Guest runs stay off the leaderboard. Reload page twice after installing.",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/more_tries.js"
+   }
 ]
