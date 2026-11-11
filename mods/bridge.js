@@ -3,8 +3,6 @@
   if (window.__r52_bridgeMod) return;
   window.__r52_bridgeMod = true;
 
-  console.log("[Mod] Bridge loaded");
-
   const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/custom_cars/Golden_Gate_Bridge.glb';
 
   window.__r52bridgeStash = null;
@@ -100,11 +98,15 @@
   chip.textContent = '🌉 LOAD BRIDGE';
   document.body.appendChild(chip);
 
-  // Listen for the Hub's downloaded file
+  var timeoutId = null;
+
   document.addEventListener('r52-download-ready', function(e) {
     if (e.detail.id === 'bridge') {
+      clearTimeout(timeoutId);
+      chip.textContent = '⏳ PARSING';
       var dataUrl = e.detail.dataUrl;
-      if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ LOADER MISSING'; return; }
+      
+      if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ NO LOADER'; return; }
       
       var loader = new THREE.GLTFLoader();
       loader.load(dataUrl, function(gltf){
@@ -120,6 +122,7 @@
 
   document.addEventListener('r52-download-error', function(e) {
     if (e.detail.id === 'bridge') {
+      clearTimeout(timeoutId);
       chip.textContent = '❌ ' + e.detail.error;
     }
   });
@@ -128,10 +131,17 @@
     if (window.__r52bridgeStash) return;
     chip.textContent = '⏳ REQUESTING';
     
-    // Ask the Hub to download it using the CSP bypass!
     document.dispatchEvent(new CustomEvent('r52-request-download', { 
       detail: { url: BRIDGE_URL, id: 'bridge' } 
     }));
+
+    // Safety timeout
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(function() {
+      if (!window.__r52bridgeStash && chip.textContent === '⏳ REQUESTING') {
+        chip.textContent = '❌ TIMEOUT';
+      }
+    }, 15000);
   };
 
   var wiped = false;
@@ -147,7 +157,7 @@
 
   window.addEventListener('r52-mod-disabled', function(e) {
     if (e.detail === 'bridge') {
-      clearInterval(intervalId); clearInterval(checkInterval);
+      clearInterval(intervalId); clearInterval(checkInterval); clearTimeout(timeoutId);
       if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
       if (window.__r52unswapBridge) window.__r52unswapBridge();
     }
