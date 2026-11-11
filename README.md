@@ -1,12 +1,12 @@
 # 01010010-00110101-00110100
 
-🏎️ RALLY52 Mod Hub
+- 🏎️ RALLY52 Mod Hub
 
 A lightweight, in-game mod loader for RALLY52.
 
 Instead of installing a dozen different Tampermonkey scripts, the Mod Hub gives you a single, native-looking interface to manage all your custom add-ons, UI tweaks, and cosmetic mods right from the game's settings menu.
 
-✨ Features
+- ✨ Features
 
 · Native UI: Injects directly into the game's settings menu so it doesn't clutter your screen.
 · Stealth Trigger: Tap the word "SETTINGS" exactly 5 times to reveal the Mod Hub tabs.
@@ -15,7 +15,7 @@ Instead of installing a dozen different Tampermonkey scripts, the Mod Hub gives 
 · Bypass CORS/CSP: Uses GM_xmlhttpRequest to securely fetch mods and stores from GitHub.
 · Built-in Fixes: A dedicated FIXES tab to apply signature paints and reset glitched states.
 
-🛠️ Installation
+- 🛠️ Installation
 
 1. Install a userscript manager for your browser:
    · Tampermonkey (Chrome, Edge, Safari, Firefox)
@@ -26,7 +26,7 @@ Instead of installing a dozen different Tampermonkey scripts, the Mod Hub gives 
 4. Tap the word "Settings" exactly 5 times.
 5. A new 🔧 MODS and 🛠️ FIXES tab will appear. Click MODS to browse and install available add-ons!
 
-📦 Currently Available Mods
+- 📦 Currently Available Mods
 
 · Custom Model Loader (glb_gtlf_loader): Swaps the default game car for your own custom 3D model.
 · Squash & Stretch (squash_stretch): Adds bouncy, cartoon-style squash-and-stretch physics animations to the car.
@@ -37,7 +37,7 @@ Instead of installing a dozen different Tampermonkey scripts, the Mod Hub gives 
 
 (Note: More mods are actively being developed!)
 
-🤝 Contributing
+- 🤝 Contributing
 
 Want to add your own mod to the Hub?
 
@@ -46,6 +46,6 @@ Want to add your own mod to the Hub?
 3. Add your mod's metadata to store.json.
 4. Open a Pull Request!
 
-⚠️ Disclaimer
+- ⚠️ Disclaimer
 
 This project is fan-made and is not affiliated with the developers of RALLY52. Use mods at your own risk. Client-side mods are generally safe, but the developers reserve the right to update their backend and break functionality at any time. Do not use mods to intentionally ruin the experience for other players.
