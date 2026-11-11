@@ -9,8 +9,15 @@
   {
     "id": "squash_stretch",
     "name": "Squash & Stretch",
-    "desc": "Makes your custom car bounce and stretch like a cartoon. (only works w model loader)",
+    "desc": "Makes your custom car bounce and stretch like a cartoon.",
     "author": "Terybery453423",
     "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/squash_stretch.js"
+  },
+  {
+    "id": "bridge",
+    "name": "Golden Gate Bridge",
+    "desc": "Drive the golden gate bridge, (close to accurate in terms of size, may be too small) ",
+    "author": "Terybery453423",
+    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/bridge.js"
   }
 ]
