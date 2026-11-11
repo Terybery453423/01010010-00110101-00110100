@@ -16,7 +16,7 @@
   {
     "id": "bridge",
     "name": "Golden Gate Bridge",
-    "desc": "Spawns the Golden Gate Bridge instead of a car. Good luck steering.",
+    "desc": "Replaces your car with the Golden Gate Bridge.",
     "author": "Terybery453423",
     "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/bridge.js"
   },
