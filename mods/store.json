@@ -19,5 +19,12 @@
     "desc": "Spawns the Golden Gate Bridge instead of a car. Good luck steering.",
     "author": "Terybery453423",
     "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/bridge.js"
+  },
+  {
+  "id": "no_dust",
+  "name": "No Dust",
+  "desc": "Removes the tire dust and skid marks from the game.",
+  "author": "Terybery453423",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/no_dust.js"
   }
 ]
