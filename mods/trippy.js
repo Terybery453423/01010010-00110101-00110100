@@ -306,7 +306,8 @@
 
   var panel = document.createElement('div');
   panel.id = 'r52tpPanel';
-  panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);z-index:999999;background:rgba(14,16,20,0.95);border:2px solid #f8f;border-radius:12px;padding:15px;display:none;flex-direction:column;align-items:center;gap:10px;width:90%;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.9);';
+  // MOVED TO TOP 10% SO IT DOESN'T COVER BUTTONS
+  panel.style.cssText = 'position:fixed;top:10%;left:50%;transform:translateX(-50%);z-index:999999;background:rgba(14,16,20,0.95);border:2px solid #f8f;border-radius:12px;padding:15px;display:none;flex-direction:column;align-items:center;gap:10px;width:90%;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.9);';
   document.body.appendChild(panel);
 
   var title = document.createElement('div');
