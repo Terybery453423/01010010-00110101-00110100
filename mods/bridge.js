@@ -3,6 +3,8 @@
   if (window.__r52_bridgeMod) return;
   window.__r52_bridgeMod = true;
 
+  console.log("[Mod] Bridge loaded");
+
   const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/custom_cars/Golden_Gate_Bridge.glb';
 
   window.__r52bridgeStash = null;
@@ -98,50 +100,28 @@
   chip.textContent = '🌉 LOAD BRIDGE';
   document.body.appendChild(chip);
 
-  var timeoutId = null;
-
-  document.addEventListener('r52-download-ready', function(e) {
-    if (e.detail.id === 'bridge') {
-      clearTimeout(timeoutId);
-      chip.textContent = '⏳ PARSING';
-      var dataUrl = e.detail.dataUrl;
-      
-      if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ NO LOADER'; return; }
-      
-      var loader = new THREE.GLTFLoader();
-      loader.load(dataUrl, function(gltf){
-        window.__r52bridgeStash = gltf.scene;
-        window.__r52bridgeSwapMsg = "queued";
-      }, undefined, function(err){
-        var m = (err && (err.message || err.type)) || String(err);
-        chip.textContent = '❌ PARSE ERR';
-        console.error("Bridge Parse Error:", err);
-      });
-    }
-  });
-
-  document.addEventListener('r52-download-error', function(e) {
-    if (e.detail.id === 'bridge') {
-      clearTimeout(timeoutId);
-      chip.textContent = '❌ ' + e.detail.error;
-    }
-  });
-
   chip.onclick = function(){
     if (window.__r52bridgeStash) return;
     chip.textContent = '⏳ REQUESTING';
     
-    document.dispatchEvent(new CustomEvent('r52-request-download', { 
-      detail: { url: BRIDGE_URL, id: 'bridge' } 
-    }));
-
-    // Safety timeout
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(function() {
-      if (!window.__r52bridgeStash && chip.textContent === '⏳ REQUESTING') {
-        chip.textContent = '❌ TIMEOUT';
-      }
-    }, 15000);
+    // Call the Hub's native download function
+    if (window.__r52DownloadFile) {
+      window.__r52DownloadFile(BRIDGE_URL, 'bridge', function(dataUrl) {
+        chip.textContent = '⏳ PARSING';
+        if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ NO LOADER'; return; }
+        var loader = new THREE.GLTFLoader();
+        loader.load(dataUrl, function(gltf){
+          window.__r52bridgeStash = gltf.scene;
+          window.__r52bridgeSwapMsg = "queued";
+        }, undefined, function(err){
+          chip.textContent = '❌ PARSE ERR';
+        });
+      }, function(err) {
+        chip.textContent = '❌ ' + err;
+      });
+    } else {
+      chip.textContent = '❌ NO HUB API';
+    }
   };
 
   var wiped = false;
@@ -155,12 +135,13 @@
     }
   }, 600);
 
-  window.addEventListener('r52-mod-disabled', function(e) {
-    if (e.detail === 'bridge') {
-      clearInterval(intervalId); clearInterval(checkInterval); clearTimeout(timeoutId);
-      if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
-      if (window.__r52unswapBridge) window.__r52unswapBridge();
-    }
-  });
+  // --- NATIVE CLEANUP REGISTRY ---
+  window.__r52ModCleanup = window.__r52ModCleanup || {};
+  window.__r52ModCleanup['bridge'] = function() {
+    clearInterval(intervalId); clearInterval(checkInterval);
+    if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
+    if (window.__r52unswapBridge) window.__r52unswapBridge();
+    console.log("[Mod] Bridge cleaned up natively.");
+  };
 
 })();
