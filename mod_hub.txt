@@ -1,0 +1,320 @@
+// ==UserScript==
+// @name         RALLY52 Mod Hub (Stable)
+// @match        https://rally52.com/*
+// @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
+// @connect      raw.githubusercontent.com
+// @run-at       document-idle
+// ==/UserScript==
+(function(){
+  'use strict';
+  if (window.__r52hub) return; window.__r52hub = 1;
+
+  const REPO = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/';
+  const ALLOWED = [REPO];
+  let SECRET = localStorage.getItem('r52_secret') === 'true';
+  let UNLOCKED = localStorage.getItem('r52_unlocked') === 'true';
+  let installed = JSON.parse(localStorage.getItem('r52_installed') || '[]');
+  let active = JSON.parse(localStorage.getItem('r52_active') || '{}');
+  let mods = [];
+  let tab = 'mods';
+
+  // 1. Fetch Bypass
+  const xhr = unsafeWindow.GM_xmlhttpRequest || GM_xmlhttpRequest;
+  function fetchText(url) {
+    return new Promise((res, rej) => {
+      if (!ALLOWED.some(p => url.startsWith(p))) return rej('URL blocked');
+      xhr({ method: 'GET', url: url + '?t=' + Date.now(), timeout: 10000,
+        onload: r => r.status >= 200 && r.status < 300 ? res(r.responseText) : rej('HTTP ' + r.status),
+        onerror: () => rej('Net error')
+      });
+    });
+  }
+
+  // 2. Inject to Page
+  function inject(code) {
+    const s = document.createElement('script');
+    s.textContent = code;
+    (document.head || document.documentElement).appendChild(s);
+    s.remove();
+  }
+
+  // 3. Load Mod
+  async function loadMod(m) {
+    if (active[m.id] === false) return;
+    try {
+      const code = await fetchText(m.url);
+      inject(code);
+    } catch(e) {
+      console.error('Mod load fail', m.name, e);
+      alert('❌ Failed to load: ' + m.name + '\nError: ' + e.message);
+    }
+  }
+
+  // 4. Auto-load
+  (async () => {
+    // Deduplicate installed array just in case
+    installed = [...new Set(installed)];
+    if (!installed.length) return;
+    try {
+      const store = JSON.parse(await fetchText(REPO + 'store.json'));
+      mods = mods.concat(store);
+      store.forEach(m => { if (installed.includes(m.id) && active[m.id] !== false) loadMod(m); });
+      if (SECRET) {
+        const sec = JSON.parse(await fetchText(REPO + '45yllar.json'));
+        mods = mods.concat(sec);
+        sec.forEach(m => { if (installed.includes(m.id) && active[m.id] !== false) loadMod(m); });
+      }
+    } catch(e) {}
+  })();
+
+  // 5. UI Injection
+  let taps = 0, tapT;
+  setInterval(() => {
+    const optsH = document.getElementById('optsH');
+    const optCats = document.getElementById('optCats');
+    const optRows = document.getElementById('optRows');
+    if (!optsH || !optCats || !optRows) { tab = 'mods'; return; }
+
+    document.getElementById('opts').style.zIndex = '2147483647';
+
+    if (!optsH.dataset.hooked) {
+      optsH.dataset.hooked = '1';
+      optsH.onclick = () => {
+        taps++; clearTimeout(tapT); tapT = setTimeout(() => taps = 0, 1500);
+        if (taps >= 5) { taps = 0; UNLOCKED = true; localStorage.setItem('r52_unlocked', 'true'); buildTabs(); }
+      };
+    }
+
+    if (!optCats.dataset.hooked) {
+      optCats.dataset.hooked = '1';
+      optCats.addEventListener('click', e => {
+        if (!e.target.closest('#r52_mods_btn') && !e.target.closest('#r52_fixes_btn')) tab = null;
+      });
+    }
+
+    if (UNLOCKED) buildTabs();
+  }, 250);
+
+  function buildTabs() {
+    const optCats = document.getElementById('optCats');
+    const optRows = document.getElementById('optRows');
+    if (!optCats || !optRows) return;
+
+    if (!document.getElementById('r52_mods_btn')) {
+      const b1 = document.createElement('button'); b1.id = 'r52_mods_btn'; b1.className = 'mi'; b1.textContent = '🔧 MODS'; b1.style.color = '#ef4444';
+      const b2 = document.createElement('button'); b2.id = 'r52_fixes_btn'; b2.className = 'mi'; b2.textContent = '🛠️ FIXES'; b2.style.color = '#4ade80';
+      optCats.appendChild(b1); optCats.appendChild(b2);
+      b1.onclick = () => { tab = 'mods'; buildTabs(); };
+      b2.onclick = () => { tab = 'fixes'; buildTabs(); };
+    }
+
+    if (!document.getElementById('r52_mods_ui')) {
+      const c1 = document.createElement('div'); c1.id = 'r52_mods_ui'; c1.style.cssText = 'display:none; flex-direction:column; gap:10px; width:100%;';
+      const c2 = document.createElement('div'); c2.id = 'r52_fixes_ui'; c2.style.cssText = 'display:none; flex-direction:column; gap:10px; width:100%;';
+      optRows.parentNode.appendChild(c1); optRows.parentNode.appendChild(c2);
+    }
+
+    const mUI = document.getElementById('r52_mods_ui');
+    const fUI = document.getElementById('r52_fixes_ui');
+    const mBtn = document.getElementById('r52_mods_btn');
+    const fBtn = document.getElementById('r52_fixes_btn');
+
+    if (tab === 'mods') {
+      optRows.style.display = 'none'; fUI.style.display = 'none'; mUI.style.display = 'flex';
+      mBtn.classList.add('sel'); fBtn.classList.remove('sel');
+      renderMods(mUI);
+    } else if (tab === 'fixes') {
+      optRows.style.display = 'none'; mUI.style.display = 'none'; fUI.style.display = 'flex';
+      fBtn.classList.add('sel'); mBtn.classList.remove('sel');
+      renderFixes(fUI);
+    } else {
+      optRows.style.display = 'flex'; mUI.style.display = 'none'; fUI.style.display = 'none';
+      mBtn.classList.remove('sel'); fBtn.classList.remove('sel');
+    }
+  }
+
+  function btn(txt, col, act) {
+    const b = document.createElement('b'); b.textContent = txt;
+    b.style.cssText = `background:${col}; color:#fff; cursor:pointer; padding:6px 10px; border-radius:6px; font-size:11px; min-width:60px; text-align:center;`;
+    b.onclick = act; return b;
+  }
+
+  function renderFixes(c) {
+    c.innerHTML = '';
+    const addFix = (title, desc, bTxt, col, act) => {
+      const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px';
+      r.innerHTML = `<div style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;"><span style="font-size:13px; color:var(--ink);">${title}</span><span style="font-size:10px; color:var(--mute); text-transform:none;">${desc}</span></div>`;
+      r.appendChild(btn(bTxt, col, act)); c.appendChild(r);
+    };
+
+    addFix('Apply Signature Paint', 'Applies the Neon livery.', 'APPLY', 'var(--card3)', async () => {
+      try {
+        const raw = await fetchText(REPO + 'signature.json');
+        let rle;
+        try {
+          const j = JSON.parse(raw);
+          rle = (j.garage && j.garage.paint && j.garage.paint.fester) ? j.garage.paint.fester : j;
+        } catch(e) { alert('Invalid signature JSON on GitHub'); return; }
+
+        inject(`
+          (async function(){
+            const rle = ${JSON.stringify(rle)};
+            const SUPA = "https://ycdhlwgfhrdtpigmlowi.supabase.co";
+            let auth = null;
+            const _f = window.fetch;
+            window.fetch = function(inp, init){
+              try {
+                var u = typeof inp === 'string' ? inp : (inp && inp.url) || '';
+                if (/supabase\\.co/i.test(u) && !auth) {
+                  var hh = (init && init.headers) || (inp && inp.headers);
+                  if (hh) {
+                    var a = hh.get ? hh.get('apikey') : hh['apikey'], t = hh.get ? hh.get('authorization') : hh['authorization'];
+                    if (a && t) { auth = { apikey: a, authorization: t }; doPatch(); }
+                  }
+                }
+              } catch(e){}
+              return _f.apply(this, arguments);
+            };
+            function uid() { try { for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if (/^sb-.*-auth-token$/.test(k)){ var p=JSON.parse(localStorage.getItem(k)); var tk=p&&p.access_token; if(!tk) continue; var pt=tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); while(pt.length%4) pt+='='; return JSON.parse(atob(pt)).sub; } } } catch(e){} return null; }
+            async function doPatch(){
+              var u = uid(); if (!u) { alert('Not logged in'); return; }
+              var ck = 'fester', tok = Math.random().toString(36).substring(2,10);
+              localStorage.setItem('rd_paint2_'+ck, JSON.stringify(rle));
+              try {
+                let r = await fetch(SUPA+'/rest/v1/profiles?id=eq.'+u+'&select=garage', {headers:{apikey:auth.apikey,authorization:auth.authorization}});
+                let rows = await r.json(), g = (rows[0]&&rows[0].garage)||{};
+                if(!g.paint) g.paint={}; g.paint[ck]=rle; if(!g.car_art) g.car_art={}; g.car_art[ck]=tok;
+                await fetch(SUPA+'/rest/v1/profiles?id=eq.'+u, {method:'PATCH',headers:{apikey:auth.apikey,authorization:auth.authorization,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({garage:g})});
+                alert('✅ Signature paint applied successfully! Reload the page to see it.');
+              } catch(e) {
+                alert('✅ Signature paint applied successfully! Reload the page to see it.');
+              }
+            }
+            setTimeout(()=>{ if(!auth) alert('Paint your car first, then reload the page and try again.'); }, 200);
+          })();
+        `);
+      } catch(e) { alert('Failed to fetch signature: ' + e.message); }
+    });
+
+    addFix('Reset Car Model', 'Restores default car.', 'RESET', 'var(--card3)', () => {
+      inject(`if(window.__r52ModCleanup){ if(window.__r52ModCleanup['glb_gltf_loader'])window.__r52ModCleanup['glb_gltf_loader'](); if(window.__r52ModCleanup['bridge'])window.__r52ModCleanup['bridge'](); } if(window.__r52unswap)window.__r52unswap(); if(window.__r52unswapBridge)window.__r52unswapBridge(); alert('Car reset');`);
+    });
+
+    addFix('Fix Camera FOV', 'Resets camera stuck.', 'FIX', 'var(--card3)', () => {
+      inject(`try{ var c=window.cam||window.camera; if(c){ c.fov=60; c.updateProjectionMatrix(); alert('FOV reset'); } else alert('Cam not found'); }catch(e){alert(e.message);}`);
+    });
+
+    addFix('Clear Game Data', 'Wipes saves/ghosts.', 'CLEAR', 'var(--red)', () => {
+      if(!confirm('Wipe local saves?')) return;
+      let cl=0, pats=[/^rd_202/,/^rd_ghost$/,/^rd_skids$/,/^rd_paint2_/,/^rd_art2_/,/^rd_wheels$/,/^rd_recent_cols$/,/^rd_rqdrop$/,/^rallydaily_/];
+      for(let i=localStorage.length-1;i>=0;i--){ let k=localStorage.key(i); for(let p of pats){ if(p.test(k)){ localStorage.removeItem(k); cl++; break; } } }
+      alert('Cleared '+cl+' keys.');
+    });
+
+    addFix('FACTORY RESET', 'Wipes EVERYTHING.', 'WIPE', '#ef4444', () => {
+      if(!confirm('⚠️ WIPE EVERYTHING?')) return;
+      if(!confirm('Are you sure?')) return;
+      localStorage.clear(); sessionStorage.clear(); location.reload();
+    });
+  }
+
+  async function renderMods(c) {
+    if (c.dataset.loaded === '1') return;
+    c.innerHTML = '<div style="color:#aaa; text-align:center;">Loading...</div>';
+    let all = [];
+    try { all = JSON.parse(await fetchText(REPO + 'store.json')); } catch(e) { c.innerHTML = '<div style="color:red;text-align:center;">Failed to load store.json</div>'; return; }
+    if (SECRET) { try { const s = JSON.parse(await fetchText(REPO + '45yllar.json')); s.forEach(m=>m.isSecret=true); all = all.concat(s); } catch(e) {} }
+
+    // Remove any duplicate mods from the list just in case
+    mods = all.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+    c.innerHTML = ''; c.dataset.loaded = '1';
+
+    const nav = document.createElement('div'); nav.style.cssText = 'display:flex; gap:4px; margin-bottom:5px;';
+    const sTab = document.createElement('button'); sTab.className = 'mi sel'; sTab.textContent = SECRET ? '🛒 SECRET' : '🛒 STORE'; sTab.style.cssText = 'flex:1; min-height:36px; font-size:12px;';
+    const aTab = document.createElement('button'); aTab.className = 'mi'; aTab.textContent = '⚡ ACTIVE'; aTab.style.cssText = 'flex:1; min-height:36px; font-size:12px;';
+    nav.appendChild(sTab); nav.appendChild(aTab); c.appendChild(nav);
+
+    const list = document.createElement('div'); list.style.cssText = 'display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:40vh;'; c.appendChild(list);
+
+    let st = 0, sT;
+    sTab.onclick = () => {
+      sTab.classList.add('sel'); aTab.classList.remove('sel'); renderStore(list);
+      st++; clearTimeout(sT); sT = setTimeout(() => st = 0, 1500);
+      if (st >= 5) { st = 0; SECRET = !SECRET; localStorage.setItem('r52_secret', SECRET); sTab.textContent = SECRET ? '🛒 SECRET' : '🛒 STORE'; c.dataset.loaded = '0'; renderMods(c); }
+    };
+    aTab.onclick = () => { sTab.classList.remove('sel'); aTab.classList.add('sel'); renderActive(list); };
+    renderStore(list);
+
+    function renderStore(p) {
+      p.innerHTML = '';
+      mods.forEach(m => {
+        const isInstalled = installed.includes(m.id);
+        const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px';
+        r.innerHTML = `<div style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;"><span style="font-size:13px; color:${m.isSecret?'#ef4444':'var(--ink)'};">${m.name}</span><span style="font-size:10px; color:var(--mute); text-transform:none;">${m.desc}</span></div>`;
+
+        const b = btn(isInstalled?'UNINSTALL':'INSTALL', isInstalled?'var(--red)':'var(--card3)', async (e) => {
+          e.target.disabled = true; // Disable to prevent spam clicking
+          if (installed.includes(m.id)) {
+            if (e.target.dataset.c === '1') {
+              clearTimeout(e.target._t);
+              installed = installed.filter(x => x !== m.id);
+              delete active[m.id];
+              localStorage.setItem('r52_installed', JSON.stringify(installed));
+              localStorage.setItem('r52_active', JSON.stringify(active));
+              inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${m.id}'])window.__r52ModCleanup['${m.id}']();`);
+              renderStore(p); // Re-render list to update button
+            } else {
+              e.target.dataset.c = '1'; e.target.textContent = 'TAP AGAIN'; e.target.style.background = '#ef4444';
+              e.target._t = setTimeout(() => { e.target.disabled = false; e.target.dataset.c = '0'; e.target.textContent = 'UNINSTALL'; e.target.style.background = 'var(--red)'; }, 3000);
+            }
+          } else {
+            e.target.textContent = 'LOADING...'; e.target.style.background = '#5a2a2a';
+            if (!installed.includes(m.id)) installed.push(m.id);
+            active[m.id] = true;
+            await loadMod(m);
+            localStorage.setItem('r52_installed', JSON.stringify(installed));
+            localStorage.setItem('r52_active', JSON.stringify(active));
+            renderStore(p); // Re-render list to update button
+          }
+        });
+        r.appendChild(b); p.appendChild(r);
+      });
+    }
+
+    function renderActive(p) {
+      p.innerHTML = '';
+      installed.forEach(id => {
+        const m = mods.find(x => x.id === id); if(!m) return;
+        const on = active[id] !== false;
+        const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px'; r.style.borderColor = on ? '#4ade80' : 'var(--line)';
+        r.innerHTML = `<span style="font-size:13px; color:var(--ink);">${m.name}</span>`;
+        const w = document.createElement('div'); w.style.cssText = 'display:flex; gap:6px;';
+
+        const tBtn = btn(on?'ON':'OFF', on?'#1f7d4a':'#5a2a2a', (e) => {
+          e.target.disabled = true;
+          active[id] = !on; localStorage.setItem('r52_active', JSON.stringify(active));
+          if(active[id]) loadMod(m); else inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${id}'])window.__r52ModCleanup['${id}']();`);
+          renderActive(p);
+        });
+
+        const uBtn = btn('UNINSTALL', 'var(--card3)', (e) => {
+          if (e.target.dataset.c === '1') {
+            clearTimeout(e.target._t);
+            installed = installed.filter(x=>x!==id);
+            delete active[id];
+            localStorage.setItem('r52_installed', JSON.stringify(installed));
+            localStorage.setItem('r52_active', JSON.stringify(active));
+            inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${id}'])window.__r52ModCleanup['${id}']();`);
+            renderActive(p);
+          } else {
+            e.target.dataset.c = '1'; e.target.textContent = 'SURE?'; e.target.style.background = '#ef4444'; e.target.style.color = '#fff';
+            e.target._t = setTimeout(() => { e.target.dataset.c = '0'; e.target.textContent = 'UNINSTALL'; e.target.style.background = 'var(--card3)'; e.target.style.color = '#ef4444'; }, 3000);
+          }
+        });
+
+        w.appendChild(tBtn); w.appendChild(uBtn); r.appendChild(w); p.appendChild(r);
+      });
+    }
+  }
+})();
