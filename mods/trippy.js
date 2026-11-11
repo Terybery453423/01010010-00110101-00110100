@@ -53,6 +53,15 @@
     return null; 
   }
 
+  // --- TOAST NOTIFICATION ---
+  function showToast(msg) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:15%;left:50%;transform:translateX(-50%);z-index:2147483647;background:#1f7d4a;color:#fff;padding:15px 25px;border-radius:10px;font:800 14px monospace;text-align:center;border:2px solid #4ade80;box-shadow:0 10px 30px rgba(0,0,0,0.8);pointer-events:none;line-height:1.5;';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 4500);
+  }
+
   // --- MATH HELPERS ---
   var B36 = "0123456789abcdefghijklmnopqrstuvwxyz";
   function b36(n){ if(n===0) return "0"; var s=""; while(n>0){ s=B36[n%36]+s; n=Math.floor(n/36); } return s; }
@@ -285,8 +294,17 @@
         });
         
         if (r.ok || r.status === 204) {
-          infoEl.textContent = "SUCCESS! Reload to see.";
+          infoEl.textContent = "SUCCESS!";
           infoEl.style.color = "#4ade80";
+          
+          // Show the big success popup
+          showToast("✅ PAINT APPLIED TO PROFILE!<br><span style='font-size:11px;color:#a7f3d0;'>Reload the page to see it on your car.</span>");
+          
+          setTimeout(function() {
+             previewBox.style.display = 'none';
+             controlsBox.style.display = 'none';
+          }, 1500);
+
         } else {
           throw new Error("server " + r.status);
         }
