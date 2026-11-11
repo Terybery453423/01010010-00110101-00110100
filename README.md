@@ -2,6 +2,8 @@
 
 A lightweight, in-game mod loader for [RALLY52](https://rally52.com/). 
 
+(everything last checked on rally52 update v0.9.3.5)
+
 Instead of installing a bunch of separate Tampermonkey scripts, this gives you a single interface to manage add-ons, UI tweaks, and cosmetic mods right from the game's settings menu.
 
 ### Features
