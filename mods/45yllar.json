@@ -7,6 +7,18 @@
     "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/soft_barriers.js"
   },
   {
+  "id": "buff_1_1x",
+  "name": "Performance Buff 1.1×",
+  "desc": "(dont use with other buff) Multiplies top speed, acceleration and grip by 1.1 on every surface. Toggle OFF to fully revert.",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/buff_1_1x.js"
+   },
+   {
+  "id": "buff_1_02x",
+  "name": "Performance Buff 1.02×",
+  "desc": "(dont use with other buff) Subtle 1.02× boost — barely noticeable. Toggle OFF to fully revert.",
+  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/buff_1_02x.js"
+   },
+   {
     "id": "trippy",
     "name": "Trippy Paint",
     "desc": "Generates crazy neon patterns and uploads them directly to your profile.",
