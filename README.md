@@ -20,8 +20,8 @@ Instead of installing a dozen different Tampermonkey scripts, the Mod Hub gives 
 1. Install a userscript manager for your browser:
    · Tampermonkey (Chrome, Edge, Safari, Firefox)
    · Userscripts (iOS Safari)
-2. Install the Mod Hub Loader:
-   · [Link to your userscript here]
+2. Copy the Mod Hub Loader script:
+   · [here](https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt)
 3. Open RALLY52 and go to the Settings menu.
 4. Tap the word "Settings" exactly 5 times.
 5. A new 🔧 MODS and 🛠️ FIXES tab will appear. Click MODS to browse and install available add-ons!
