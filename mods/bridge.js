@@ -5,7 +5,7 @@
 
   console.log("[Mod] Bridge loaded");
 
-  const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/01010010-00110101-00110100@main/custom_cars/Golden_Gate_Bridge.glb';
+  const BRIDGE_URL = 'const BRIDGE_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/Golden_Gate_Bridge.glb';
 
   window.__r52bridgeStash = null;
   window.__r52bridgeBaked = null;
