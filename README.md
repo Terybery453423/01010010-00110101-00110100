@@ -1,4 +1,4 @@
-# 01010010-00110101-00110100
+# Tuner52
 
 A lightweight, in-game mod loader for [RALLY52](https://rally52.com/). 
 
@@ -16,7 +16,7 @@ Instead of installing a bunch of separate Tampermonkey scripts, this gives you a
 
 ### Installation
 1. Install a userscript manager for your browser (Tampermonkey, Userscripts for iOS, etc).
-2. Copy the [Mod Hub Loader script](https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt).
+2. Copy the [Mod Hub Loader script](https://github.com/Terybery453423/tuner52/blob/main/mod_hub.txt).
 3. Paste the script into Tampermonkey, or other userscript manager and save
 4. Open RALLY52, go to Settings, and tap "Settings" exactly 5 times.
 5. The MODS and FIXES tabs will appear. Open MODS to browse the store.
