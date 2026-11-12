@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name         RALLY52 Mod Hub (Stable)
+// @version      2.0.0
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -13,14 +14,20 @@
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
 
+  const HUB_VERSION = '2.0.0'; // Update this when you push a new script!
   const REPO = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/';
-  const ALLOWED = [REPO];
+  const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mod_hub.txt';
+  const ALLOWED = [REPO, ROOT_URL];
+  
   let SECRET = localStorage.getItem('r52_secret') === 'true';
   let UNLOCKED = localStorage.getItem('r52_unlocked') === 'true';
   let installed = JSON.parse(localStorage.getItem('r52_installed') || '[]');
   let active = JSON.parse(localStorage.getItem('r52_active') || '{}');
   let mods = [];
   let tab = 'mods';
+  
+  let updateAvailable = false;
+  let latestVersion = HUB_VERSION;
 
   // 1. Fetch Bypass
   const xhr = unsafeWindow.GM_xmlhttpRequest || GM_xmlhttpRequest;
@@ -34,6 +41,28 @@
     });
   }
 
+  // 1.5 Check for Hub Updates
+  async function checkVersion() {
+    try {
+      const code = await fetchText(ROOT_URL);
+      const match = code.match(/@version\s+([0-9.]+)/);
+      if (match && match[1]) {
+        latestVersion = match[1];
+        if (latestVersion !== HUB_VERSION) {
+          updateAvailable = true;
+          // Force UI rebuild if it's already open
+          const mUI = document.getElementById('r52_mods_ui');
+          if (mUI && mUI.style.display !== 'none') {
+            mUI.dataset.loaded = '0';
+            renderMods(mUI);
+          }
+        }
+      }
+    } catch(e) {
+      console.warn('[Hub] Version check failed:', e);
+    }
+  }
+
   // 2. Inject to Page
   function inject(code) {
     const s = document.createElement('script');
@@ -42,7 +71,7 @@
     s.remove();
   }
 
-  // 2.5 Expose Hub API for Mods (Fixes "no hub api" error for bridge/glb loader)
+  // 2.5 Expose Hub API for Mods
   inject(`
     window.__r52DownloadFile = function(url, name, onSuccess, onError) {
       const id = Math.random().toString(36);
@@ -52,15 +81,10 @@
     };
   `);
 
-  // 2.6 Listen for mod download requests (Bypass CORS/CSP)
   window.addEventListener('r52_hub_download', (e) => {
     const { url, name, id } = e.detail;
-
-    xhr({
-      method: 'GET',
-      url: url,
-      responseType: 'blob',
-      timeout: 30000,
+    xhr({ 
+      method: 'GET', url: url, responseType: 'blob', timeout: 30000,
       onload: r => {
         if (r.status >= 200 && r.status < 300) {
           const objectUrl = URL.createObjectURL(r.response);
@@ -96,7 +120,9 @@
     }
   }
 
-  // 4. Auto-load
+  // 4. Auto-load & Version Check
+  checkVersion();
+  
   (async () => {
     installed = [...new Set(installed)];
     if (!installed.length) return;
@@ -221,12 +247,24 @@
   async function renderMods(c) {
     if (c.dataset.loaded === '1') return;
     c.innerHTML = '<div style="color:#aaa; text-align:center;">Loading...</div>';
+    
     let all = [];
     try { all = JSON.parse(await fetchText(REPO + 'store.json')); } catch(e) { c.innerHTML = '<div style="color:red;text-align:center;">Failed to load store.json</div>'; return; }
     if (SECRET) { try { const s = JSON.parse(await fetchText(REPO + '45yllar.json')); s.forEach(m=>m.isSecret=true); all = all.concat(s); } catch(e) {} }
 
     mods = all.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
     c.innerHTML = ''; c.dataset.loaded = '1';
+
+    // UPDATE BANNER
+    if (updateAvailable) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#ef4444; color:#fff; padding:10px; border-radius:8px; font-size:12px; text-align:center; margin-bottom:5px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.3);';
+      banner.innerHTML = `⚠️ <b>HUB UPDATE REQUIRED (v${latestVersion})</b><br>Click here to update your script.`;
+      banner.onclick = () => {
+        window.open('https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt', '_blank');
+      };
+      c.appendChild(banner);
+    }
 
     const nav = document.createElement('div'); nav.style.cssText = 'display:flex; gap:4px; margin-bottom:5px;';
     const sTab = document.createElement('button'); sTab.className = 'mi sel'; sTab.textContent = SECRET ? '🛒 SECRET' : '🛒 STORE'; sTab.style.cssText = 'flex:1; min-height:36px; font-size:12px;';
