@@ -4,55 +4,55 @@
     "name": "Custom Car Model",
     "desc": "Swap the in-game car for your own GLTF/GLB model.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/glb_gtlf_loader.js"
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/glb_gtlf_loader.js"
   },
   {
     "id": "squash_stretch",
     "name": "Squash & Stretch",
     "desc": "Makes your custom car bounce and stretch like a cartoon.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/squash_stretch.js"
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/squash_stretch.js"
   },
   {
     "id": "bridge",
     "name": "Golden Gate Bridge",
     "desc": "Replaces your car with the Golden Gate Bridge.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/bridge.js"
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/bridge.js"
   },
   {
   "id": "no_dust",
   "name": "No Dust",
   "desc": "Removes the tire dust and skid marks from the game.",
   "author": "Terybery453423",
-  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/no_dust.js"
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/no_dust.js"
   },
   {
     "id": "trippy",
     "name": "Trippy Paint",
     "desc": "Generates crazy neon patterns and uploads them directly to your profile.",
     "author": "Terybery453423",
-    "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/trippy.js"
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/trippy.js"
   }, 
   {
   "id": "synthwave_theme",
   "name": "Synthwave Theme",
-  "desc": "⚠️ HIGH LAG RISK. Replaces the UI with neon pinks and cyans.",
+  "desc": "⚠️ LAG RISK. Replaces the UI with neon pinks and cyans.",
   "author": "Terybery453423",
-  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/synthwave_theme.js"
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/themes/synthwave_theme.js"
   },
   {
   "id": "oled_theme",
   "name": "OLED Theme",
   "desc": "True black backgrounds, crisp white UI, no scanlines. Saves battery.",
   "author": "Terybery453423",
-  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/oled_theme.js"
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/themes/oled_theme.js"
    },
    {
   "id": "crimson_theme",
   "name": "Crimson Theme",
   "desc": "Dark blood-red aesthetic with a neon red glow.",
   "author": "Terybery453423",
-  "url": "https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/themes/crimson_theme.js"
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/themes/crimson_theme.js"
    } 
 ]
