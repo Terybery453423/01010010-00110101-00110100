@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         RALLY52 Mod Hub (Stable)
-// @version      2.0.0
+// @version      2.0.1
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
