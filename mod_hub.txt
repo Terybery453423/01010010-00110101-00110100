@@ -273,7 +273,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
           banner.innerHTML = `✅ <b>COPIED!</b><br>Paste this into your Tampermonkey script.`;
         } catch(err) {
           console.warn('Clipboard failed', err);
-          window.open('https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt', '_blank');
+          window.open('https://github.com/Terybery453423/Tuner52/blob/main/mod_hub.txt', '_blank');
         }
       };
       c.appendChild(banner);
