@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         TunerX (RALLY52)
+// @name         Tuner52 (RALLY52)
 // @namespace    https://github.com/Terybery453423
 // @version      2.0.5
-// @description  TunerX (TX) - Stealth mod menu for RALLY52. Tap Settings 5 times to unlock.
+// @description  Tuner52 - Stealth mod menu for RALLY52. Tap Settings 5 times to unlock.
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -17,8 +17,10 @@
   if (window.__r52hub) return; window.__r52hub = 1;
 
   const HUB_VERSION = '2.0.5'; // Update this when you push a new script!
- const REPO = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/';
-const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mod_hub.txt';
+  
+  // 👇 MAKE SURE THIS MATCHES YOUR NEW GITHUB REPO NAME 👇
+  const REPO = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/';
+  const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mod_hub.txt';
   const ALLOWED = [REPO, ROOT_URL];
   
   let SECRET = localStorage.getItem('r52_secret') === 'true';
@@ -62,7 +64,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
         }
       }
     } catch(e) {
-      console.warn('[TX] Version check failed:', e);
+      console.warn('[Tuner52] Version check failed:', e);
     }
   }
 
@@ -118,7 +120,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
       const code = await fetchText(m.url);
       inject(code);
     } catch(e) {
-      console.error('[TX] Mod load fail', m.name, e);
+      console.error('[Tuner52] Mod load fail', m.name, e);
       alert('❌ Failed to load: ' + m.name + '\nError: ' + e.message);
     }
   }
@@ -179,7 +181,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
     if (!optCats || !optRows) return;
 
     if (!document.getElementById('r52_mods_btn')) {
-      const b1 = document.createElement('button'); b1.id = 'r52_mods_btn'; b1.className = 'mi'; b1.textContent = '⚡ TX'; b1.style.color = '#ef4444';
+      const b1 = document.createElement('button'); b1.id = 'r52_mods_btn'; b1.className = 'mi'; b1.textContent = '⚡ TUNER52'; b1.style.color = '#ef4444';
       const b2 = document.createElement('button'); b2.id = 'r52_fixes_btn'; b2.className = 'mi'; b2.textContent = '🛠️ FIXES'; b2.style.color = '#4ade80';
       optCats.appendChild(b1); optCats.appendChild(b2);
       b1.onclick = () => { tab = 'mods'; buildTabs(); };
@@ -249,7 +251,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
 
   async function renderMods(c) {
     if (c.dataset.loaded === '1') return;
-    c.innerHTML = '<div style="color:#aaa; text-align:center;">Loading TunerX...</div>';
+    c.innerHTML = '<div style="color:#aaa; text-align:center;">Loading Tuner52...</div>';
     
     let all = [];
     try { all = JSON.parse(await fetchText(REPO + 'store.json')); } catch(e) { c.innerHTML = '<div style="color:red;text-align:center;">Failed to load store.json</div>'; return; }
@@ -262,7 +264,7 @@ const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/
     if (updateAvailable) {
       const banner = document.createElement('div');
       banner.style.cssText = 'background:#ef4444; color:#fff; padding:10px; border-radius:8px; font-size:12px; text-align:center; margin-bottom:5px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.3); transition: background 0.2s;';
-      banner.innerHTML = `⚠️ <b>TX UPDATE REQUIRED (v${latestVersion})</b><br>Click here to copy the new TX script.`;
+      banner.innerHTML = `⚠️ <b>TUNER52 UPDATE REQUIRED (v${latestVersion})</b><br>Click here to copy the new script.`;
       
       banner.onclick = async () => {
         try {
