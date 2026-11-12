@@ -28,6 +28,7 @@
   
   let updateAvailable = false;
   let latestVersion = HUB_VERSION;
+  let latestScriptCode = '';
 
   // 1. Fetch Bypass
   const xhr = unsafeWindow.GM_xmlhttpRequest || GM_xmlhttpRequest;
@@ -45,12 +46,12 @@
   async function checkVersion() {
     try {
       const code = await fetchText(ROOT_URL);
+      latestScriptCode = code;
       const match = code.match(/@version\s+([0-9.]+)/);
       if (match && match[1]) {
         latestVersion = match[1];
         if (latestVersion !== HUB_VERSION) {
           updateAvailable = true;
-          // Force UI rebuild if it's already open
           const mUI = document.getElementById('r52_mods_ui');
           if (mUI && mUI.style.display !== 'none') {
             mUI.dataset.loaded = '0';
@@ -258,10 +259,20 @@
     // UPDATE BANNER
     if (updateAvailable) {
       const banner = document.createElement('div');
-      banner.style.cssText = 'background:#ef4444; color:#fff; padding:10px; border-radius:8px; font-size:12px; text-align:center; margin-bottom:5px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.3);';
-      banner.innerHTML = `⚠️ <b>HUB UPDATE REQUIRED (v${latestVersion})</b><br>Click here to update your script.`;
-      banner.onclick = () => {
-        window.open('https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt', '_blank');
+      banner.style.cssText = 'background:#ef4444; color:#fff; padding:10px; border-radius:8px; font-size:12px; text-align:center; margin-bottom:5px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.3); transition: background 0.2s;';
+      banner.innerHTML = `⚠️ <b>HUB UPDATE REQUIRED (v${latestVersion})</b><br>Click here to copy the new hub.`;
+      
+      banner.onclick = async () => {
+        try {
+          if (!latestScriptCode) latestScriptCode = await fetchText(ROOT_URL);
+          await navigator.clipboard.writeText(latestScriptCode);
+          banner.style.background = '#4ade80';
+          banner.style.color = '#000';
+          banner.innerHTML = `✅ <b>COPIED!</b><br>Paste this into your Tampermonkey script.`;
+        } catch(err) {
+          console.warn('Clipboard failed', err);
+          window.open('https://github.com/Terybery453423/01010010-00110101-00110100/blob/main/mod_hub.txt', '_blank');
+        }
       };
       c.appendChild(banner);
     }
