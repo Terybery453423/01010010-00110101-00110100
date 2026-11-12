@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         RALLY52 Mod Hub (Stable)
-// @version      2.0.1
+// @version      2.0.0
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -14,7 +14,7 @@
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
 
-  const HUB_VERSION = '2.0.1'; // Update this when you push a new script!
+  const HUB_VERSION = '2.0.0'; // Update this when you push a new script!
   const REPO = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mods/';
   const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/01010010-00110101-00110100/main/mod_hub.txt';
   const ALLOWED = [REPO, ROOT_URL];
