@@ -4,8 +4,11 @@
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @connect      raw.githubusercontent.com
+// @connect      cdn.jsdelivr.net
 // @run-at       document-idle
+// @license      GPL-3.0
 // ==/UserScript==
+
 (function(){
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
@@ -39,6 +42,48 @@
     s.remove();
   }
 
+  // 2.5 Expose Hub API for Mods (Fixes "no hub api" error for bridge/glb loader)
+  inject(`
+    window.__r52DownloadFile = function(url, name, onSuccess, onError) {
+      const id = Math.random().toString(36);
+      window._r52_dl_resolvers = window._r52_dl_resolvers || {};
+      window._r52_dl_resolvers[id] = { onSuccess, onError };
+      window.dispatchEvent(new CustomEvent('r52_hub_download', { detail: { url, name, id } }));
+    };
+  `);
+
+  // 2.6 Listen for mod download requests (Bypass CORS/CSP)
+  window.addEventListener('r52_hub_download', (e) => {
+    const { url, name, id } = e.detail;
+
+    xhr({
+      method: 'GET',
+      url: url,
+      responseType: 'blob',
+      timeout: 30000,
+      onload: r => {
+        if (r.status >= 200 && r.status < 300) {
+          const objectUrl = URL.createObjectURL(r.response);
+          if (unsafeWindow._r52_dl_resolvers[id]) {
+            unsafeWindow._r52_dl_resolvers[id].onSuccess(objectUrl);
+            delete unsafeWindow._r52_dl_resolvers[id];
+          }
+        } else {
+          if (unsafeWindow._r52_dl_resolvers[id]) {
+            unsafeWindow._r52_dl_resolvers[id].onError('HTTP ' + r.status);
+            delete unsafeWindow._r52_dl_resolvers[id];
+          }
+        }
+      },
+      onerror: () => {
+        if (unsafeWindow._r52_dl_resolvers[id]) {
+          unsafeWindow._r52_dl_resolvers[id].onError('Net error');
+          delete unsafeWindow._r52_dl_resolvers[id];
+        }
+      }
+    });
+  });
+
   // 3. Load Mod
   async function loadMod(m) {
     if (active[m.id] === false) return;
@@ -53,7 +98,6 @@
 
   // 4. Auto-load
   (async () => {
-    // Deduplicate installed array just in case
     installed = [...new Set(installed)];
     if (!installed.length) return;
     try {
@@ -76,7 +120,11 @@
     const optRows = document.getElementById('optRows');
     if (!optsH || !optCats || !optRows) { tab = 'mods'; return; }
 
-    document.getElementById('opts').style.zIndex = '2147483647';
+    const optsEl = document.getElementById('opts');
+    if (optsEl && !optsEl.dataset.zset) {
+      optsEl.style.zIndex = '2147483647';
+      optsEl.dataset.zset = '1';
+    }
 
     if (!optsH.dataset.hooked) {
       optsH.dataset.hooked = '1';
@@ -148,55 +196,6 @@
       r.appendChild(btn(bTxt, col, act)); c.appendChild(r);
     };
 
-    addFix('Apply Signature Paint', 'Applies the Neon livery.', 'APPLY', 'var(--card3)', async () => {
-      try {
-        const raw = await fetchText(REPO + 'signature.json');
-        let rle;
-        try {
-          const j = JSON.parse(raw);
-          rle = (j.garage && j.garage.paint && j.garage.paint.fester) ? j.garage.paint.fester : j;
-        } catch(e) { alert('Invalid signature JSON on GitHub'); return; }
-
-        inject(`
-          (async function(){
-            const rle = ${JSON.stringify(rle)};
-            const SUPA = "https://ycdhlwgfhrdtpigmlowi.supabase.co";
-            let auth = null;
-            const _f = window.fetch;
-            window.fetch = function(inp, init){
-              try {
-                var u = typeof inp === 'string' ? inp : (inp && inp.url) || '';
-                if (/supabase\\.co/i.test(u) && !auth) {
-                  var hh = (init && init.headers) || (inp && inp.headers);
-                  if (hh) {
-                    var a = hh.get ? hh.get('apikey') : hh['apikey'], t = hh.get ? hh.get('authorization') : hh['authorization'];
-                    if (a && t) { auth = { apikey: a, authorization: t }; doPatch(); }
-                  }
-                }
-              } catch(e){}
-              return _f.apply(this, arguments);
-            };
-            function uid() { try { for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if (/^sb-.*-auth-token$/.test(k)){ var p=JSON.parse(localStorage.getItem(k)); var tk=p&&p.access_token; if(!tk) continue; var pt=tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); while(pt.length%4) pt+='='; return JSON.parse(atob(pt)).sub; } } } catch(e){} return null; }
-            async function doPatch(){
-              var u = uid(); if (!u) { alert('Not logged in'); return; }
-              var ck = 'fester', tok = Math.random().toString(36).substring(2,10);
-              localStorage.setItem('rd_paint2_'+ck, JSON.stringify(rle));
-              try {
-                let r = await fetch(SUPA+'/rest/v1/profiles?id=eq.'+u+'&select=garage', {headers:{apikey:auth.apikey,authorization:auth.authorization}});
-                let rows = await r.json(), g = (rows[0]&&rows[0].garage)||{};
-                if(!g.paint) g.paint={}; g.paint[ck]=rle; if(!g.car_art) g.car_art={}; g.car_art[ck]=tok;
-                await fetch(SUPA+'/rest/v1/profiles?id=eq.'+u, {method:'PATCH',headers:{apikey:auth.apikey,authorization:auth.authorization,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({garage:g})});
-                alert('✅ Signature paint applied successfully! Reload the page to see it.');
-              } catch(e) {
-                alert('✅ Signature paint applied successfully! Reload the page to see it.');
-              }
-            }
-            setTimeout(()=>{ if(!auth) alert('Paint your car first, then reload the page and try again.'); }, 200);
-          })();
-        `);
-      } catch(e) { alert('Failed to fetch signature: ' + e.message); }
-    });
-
     addFix('Reset Car Model', 'Restores default car.', 'RESET', 'var(--card3)', () => {
       inject(`if(window.__r52ModCleanup){ if(window.__r52ModCleanup['glb_gltf_loader'])window.__r52ModCleanup['glb_gltf_loader'](); if(window.__r52ModCleanup['bridge'])window.__r52ModCleanup['bridge'](); } if(window.__r52unswap)window.__r52unswap(); if(window.__r52unswapBridge)window.__r52unswapBridge(); alert('Car reset');`);
     });
@@ -226,7 +225,6 @@
     try { all = JSON.parse(await fetchText(REPO + 'store.json')); } catch(e) { c.innerHTML = '<div style="color:red;text-align:center;">Failed to load store.json</div>'; return; }
     if (SECRET) { try { const s = JSON.parse(await fetchText(REPO + '45yllar.json')); s.forEach(m=>m.isSecret=true); all = all.concat(s); } catch(e) {} }
 
-    // Remove any duplicate mods from the list just in case
     mods = all.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
     c.innerHTML = ''; c.dataset.loaded = '1';
 
@@ -254,7 +252,7 @@
         r.innerHTML = `<div style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;"><span style="font-size:13px; color:${m.isSecret?'#ef4444':'var(--ink)'};">${m.name}</span><span style="font-size:10px; color:var(--mute); text-transform:none;">${m.desc}</span></div>`;
 
         const b = btn(isInstalled?'UNINSTALL':'INSTALL', isInstalled?'var(--red)':'var(--card3)', async (e) => {
-          e.target.disabled = true; // Disable to prevent spam clicking
+          e.target.disabled = true;
           if (installed.includes(m.id)) {
             if (e.target.dataset.c === '1') {
               clearTimeout(e.target._t);
@@ -263,7 +261,7 @@
               localStorage.setItem('r52_installed', JSON.stringify(installed));
               localStorage.setItem('r52_active', JSON.stringify(active));
               inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${m.id}'])window.__r52ModCleanup['${m.id}']();`);
-              renderStore(p); // Re-render list to update button
+              renderStore(p);
             } else {
               e.target.dataset.c = '1'; e.target.textContent = 'TAP AGAIN'; e.target.style.background = '#ef4444';
               e.target._t = setTimeout(() => { e.target.disabled = false; e.target.dataset.c = '0'; e.target.textContent = 'UNINSTALL'; e.target.style.background = 'var(--red)'; }, 3000);
@@ -275,7 +273,7 @@
             await loadMod(m);
             localStorage.setItem('r52_installed', JSON.stringify(installed));
             localStorage.setItem('r52_active', JSON.stringify(active));
-            renderStore(p); // Re-render list to update button
+            renderStore(p);
           }
         });
         r.appendChild(b); p.appendChild(r);
@@ -285,7 +283,7 @@
     function renderActive(p) {
       p.innerHTML = '';
       installed.forEach(id => {
-        const m = mods.find(x => x.id === id); if(!m) return;
+        const m = mods.find(x => x.id === id) || { id, name: '⚠️ Unknown: ' + id, desc: 'No longer in store' };
         const on = active[id] !== false;
         const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px'; r.style.borderColor = on ? '#4ade80' : 'var(--line)';
         r.innerHTML = `<span style="font-size:13px; color:var(--ink);">${m.name}</span>`;
