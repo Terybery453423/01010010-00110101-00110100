@@ -31,7 +31,7 @@
     }
     if (!carGroup) return;
 
-    // Find the original mesh (the one scaled to 0.01)
+    // Find the original mesh (scaled to 0.01)
     for (let j = 0; j < carGroup.children.length; j++) {
       const ch = carGroup.children[j];
       if (ch.type === "Group" && ch.scale && Math.abs(ch.scale.x - 0.01) < 0.001) {
@@ -48,36 +48,59 @@
   }, 200);
 
   function buildHitbox() {
-    // If we already have a hitbox, remove it first (in case the car model changed)
+    if (!originalMesh) return;
+    
     if (hitboxGroup && hitboxGroup.parent) {
       hitboxGroup.parent.remove(hitboxGroup);
     }
 
-    // Calculate the exact bounding box of the car mesh
-    const box3 = new THREE.Box3().setFromObject(originalMesh);
-    const size = box3.getSize(new THREE.Vector3());
-    const center = box3.getCenter(new THREE.Vector3());
+    // Force update world matrices to ensure accurate calculation
+    originalMesh.updateMatrixWorld(true);
 
-    // Create the wireframe geometry
+    // 1. Calculate world bounding box
+    const worldBox = new THREE.Box3().setFromObject(originalMesh);
+    
+    // 2. Convert the 8 corners of the world box into the local space of the originalMesh
+    // This perfectly accounts for any scaling (0.01) or offset the game applies.
+    const localBox = new THREE.Box3();
+    const min = worldBox.min, max = worldBox.max;
+    const corners = [
+        new THREE.Vector3(min.x, min.y, min.z),
+        new THREE.Vector3(max.x, min.y, min.z),
+        new THREE.Vector3(min.x, max.y, min.z),
+        new THREE.Vector3(max.x, max.y, min.z),
+        new THREE.Vector3(min.x, min.y, max.z),
+        new THREE.Vector3(max.x, min.y, max.z),
+        new THREE.Vector3(min.x, max.y, max.z),
+        new THREE.Vector3(max.x, max.y, max.z)
+    ];
+    
+    corners.forEach(c => {
+        originalMesh.worldToLocal(c);
+        localBox.expandByPoint(c);
+    });
+    
+    const size = localBox.getSize(new THREE.Vector3());
+    const center = localBox.getCenter(new THREE.Vector3());
+
+    // 3. Create geometry (it will inherit the 0.01 scale from originalMesh)
     const geo = new THREE.BoxGeometry(size.x, size.y, size.z);
     const edges = new THREE.EdgesGeometry(geo);
     const lineMat = new THREE.LineBasicMaterial({ 
       color: 0x00ff00, // Neon green
-      depthTest: false, // Render on top of the car
+      depthTest: false,
       transparent: true,
       opacity: 0.8
     });
     
     const line = new THREE.LineSegments(edges, lineMat);
 
-    // Create a wrapper group so we can position the box at the car's center
     hitboxGroup = new THREE.Group();
     hitboxGroup.position.copy(center);
     hitboxGroup.add(line);
 
-    // Add the hitbox to the exact same parent as the car mesh
-    // (so it inherits the 0.01 scale and rotates perfectly with the car)
-    originalMesh.parent.add(hitboxGroup);
+    // 4. Attach directly to originalMesh so it inherits all offsets/rotations
+    originalMesh.add(hitboxGroup);
 
     console.log("[Mod] Hitbox drawn. Size:", size);
   }
