@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tuner52 (RALLY52)
 // @namespace    https://github.com/Terybery453423
-// @version      2.0.8
+// @version      2.0.9
 // @description  Tuner52 - Stealth mod menu for RALLY52. Tap Settings 5 times to unlock.
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
 
-  const HUB_VERSION = '2.0.8'; 
+  const HUB_VERSION = '2.0.9'; 
   
   const REPO = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/';
   const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mod_hub.txt';
@@ -83,7 +83,6 @@
       window._r52_dl_resolvers[id] = { onSuccess, onError };
       window.dispatchEvent(new CustomEvent('r52_hub_download', { detail: { url, name, id } }));
     };
-    // API for mods to hide their UI
     window.__r52ModUIToggles = window.__r52ModUIToggles || {};
     window.__r52ApplyUIToggle = function(id, visible) {
       if (window.__r52ModUIToggles[id]) {
@@ -125,7 +124,6 @@
     try {
       const code = await fetchText(m.url);
       inject(code);
-      // Restore UI state if it was hidden
       const isHidden = localStorage.getItem('r52_ui_' + m.id) === 'true';
       if (isHidden) {
         setTimeout(() => inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${m.id}', false);`), 500);
@@ -163,7 +161,6 @@
     const tSocial = document.querySelector('.tSocial');
     if (!tSocial) return;
     
-    // 🛑 PUT YOUR LINKS HERE
     const MY_TIKTOK = 'https://www.tiktok.com/@YOUR_TIKTOK';
     const MY_DISCORD = 'https://discord.gg/YOUR_INVITE';
 
@@ -182,7 +179,7 @@
   }
 
   setInterval(() => {
-    hijackSocials(); // Built-in hijack
+    hijackSocials(); 
 
     const optsH = document.getElementById('optsH');
     const optCats = document.getElementById('optCats');
@@ -388,25 +385,26 @@
         card.className = 'orow'; 
         card.style.cssText = 'display:flex; flex-direction:column; padding:12px; gap:10px; cursor:pointer; border-color: ' + (isOn ? '#4ade80' : 'var(--line)');
 
-        // Header (Click to Expand)
         const head = document.createElement('div');
         head.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%;';
         head.innerHTML = `<span style="font-size:14px; color:${isOn?'var(--ink)':'var(--mute)'}; font-weight:${isOn?'700':'400'};">${m.name}</span> <span style="font-size:10px; color:var(--mute); transition: transform 0.2s;" class="tx-arrow">▼</span>`;
 
-        // Expanded Options (Hidden by default)
         const opts = document.createElement('div');
         opts.style.cssText = 'display:none; gap:6px; width:100%; margin-top:5px;';
 
-        // UI Toggle Button
-        const uiBtn = btn(isUIHidden ? 'SHOW UI' : 'HIDE UI', 'var(--card3)', (e) => {
-          e.stopPropagation();
-          const newState = !isUIHidden;
-          localStorage.setItem('r52_ui_' + id, newState);
-          inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${id}', ${!newState});`);
-          renderActive(p);
-        });
+        // UI Toggle Button (ONLY SHOWS IF MOD SUPPORTS IT)
+        const hasUI = typeof unsafeWindow.__r52ModUIToggles?.[id] === 'function';
+        if (hasUI) {
+          const uiBtn = btn(isUIHidden ? 'SHOW UI' : 'HIDE UI', 'var(--card3)', (e) => {
+            e.stopPropagation();
+            const newState = !isUIHidden;
+            localStorage.setItem('r52_ui_' + id, newState);
+            inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${id}', ${!newState});`);
+            renderActive(p);
+          });
+          opts.appendChild(uiBtn);
+        }
 
-        // Main ON/OFF Button
         const mainBtn = btn(isOn ? 'ON' : 'OFF', isOn ? '#1f7d4a' : '#5a2a2a', (e) => {
           e.stopPropagation();
           active[id] = !isOn;
@@ -416,7 +414,6 @@
           renderActive(p);
         });
 
-        // Remove Button
         const uBtn = btn('REMOVE', 'var(--card3)', (e) => {
           e.stopPropagation();
           if (e.target.dataset.c === '1') {
@@ -434,13 +431,11 @@
           }
         });
 
-        opts.appendChild(uiBtn); 
         opts.appendChild(mainBtn); 
         opts.appendChild(uBtn);
         card.appendChild(head); 
         card.appendChild(opts);
 
-        // Expand/Collapse Logic
         head.onclick = () => {
           const isExpanded = opts.style.display === 'flex';
           opts.style.display = isExpanded ? 'none' : 'flex';
