@@ -21,10 +21,11 @@
     "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/bridge.js"
   },
   {
-  "id": "bowling_ball",
-  "name": "Bowling Ball Car",
-  "desc": "Turns your car into a giant rolling bowling ball (Visual only).",
-  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/custom_cars/bowling_ball.js"
+    "id": "bowling_ball",
+    "name": "Bowling Ball Car",
+    "desc": "Turns your car into a giant rolling bowling ball (Visual only).",
+    "author": "Terybery453423", 
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/custom_cars/bowling_ball.js"
   }, 
   {
   "id": "no_dust",
