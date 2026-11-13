@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tuner52 (RALLY52)
 // @namespace    https://github.com/Terybery453423
-// @version      2.0.9
+// @version      2.0.10
 // @description  Tuner52 - Stealth mod menu for RALLY52. Tap Settings 5 times to unlock.
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
 
-  const HUB_VERSION = '2.0.9'; 
+  const HUB_VERSION = '2.0.10'; 
   
   const REPO = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/';
   const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mod_hub.txt';
@@ -67,12 +67,18 @@
     }
   }
 
-  // 2. Inject to Page
+  // 2. Inject to Page (RETURNS A PROMISE)
   function inject(code) {
-    const s = document.createElement('script');
-    s.textContent = code;
-    (document.head || document.documentElement).appendChild(s);
-    s.remove();
+    return new Promise((resolve) => {
+      const evt = 'r52_inject_' + Math.random().toString(36);
+      const s = document.createElement('script');
+      s.textContent = code + `\n;window.dispatchEvent(new CustomEvent('${evt}'));`;
+      
+      window.addEventListener(evt, () => resolve(), { once: true });
+      
+      (document.head || document.documentElement).appendChild(s);
+      s.remove();
+    });
   }
 
   // 2.5 Expose Hub API for Mods
@@ -123,10 +129,21 @@
     if (active[m.id] === false) return;
     try {
       const code = await fetchText(m.url);
-      inject(code);
+      await inject(code); // Wait for the script to fully execute!
+      
       const isHidden = localStorage.getItem('r52_ui_' + m.id) === 'true';
       if (isHidden) {
-        setTimeout(() => inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${m.id}', false);`), 500);
+        await inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${m.id}', false);`);
+      }
+
+      // Refresh ACTIVE tab if it's currently open so the UI button appears
+      const aTab = Array.from(document.querySelectorAll('.mi')).find(b => b.textContent === '⚡ ACTIVE');
+      if (aTab && aTab.classList.contains('sel')) {
+        const mUI = document.getElementById('r52_mods_ui');
+        if (mUI) {
+          const list = mUI.querySelector('div[style*="overflow-y:auto"]');
+          if (list) renderActive(list);
+        }
       }
     } catch(e) {
       console.error('[Tuner52] Mod load fail', m.name, e);
