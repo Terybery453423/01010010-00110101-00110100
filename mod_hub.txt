@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tuner52 (RALLY52)
 // @namespace    https://github.com/Terybery453423
-// @version      2.0.5
+// @version      2.0.8
 // @description  Tuner52 - Stealth mod menu for RALLY52. Tap Settings 5 times to unlock.
 // @match        https://rally52.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,9 +16,8 @@
   'use strict';
   if (window.__r52hub) return; window.__r52hub = 1;
 
-  const HUB_VERSION = '2.0.5'; // Update this when you push a new script!
+  const HUB_VERSION = '2.0.8'; 
   
-  // 👇 MAKE SURE THIS MATCHES YOUR NEW GITHUB REPO NAME 👇
   const REPO = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/';
   const ROOT_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mod_hub.txt';
   const ALLOWED = [REPO, ROOT_URL];
@@ -84,6 +83,13 @@
       window._r52_dl_resolvers[id] = { onSuccess, onError };
       window.dispatchEvent(new CustomEvent('r52_hub_download', { detail: { url, name, id } }));
     };
+    // API for mods to hide their UI
+    window.__r52ModUIToggles = window.__r52ModUIToggles || {};
+    window.__r52ApplyUIToggle = function(id, visible) {
+      if (window.__r52ModUIToggles[id]) {
+        window.__r52ModUIToggles[id](visible);
+      }
+    };
   `);
 
   window.addEventListener('r52_hub_download', (e) => {
@@ -119,6 +125,11 @@
     try {
       const code = await fetchText(m.url);
       inject(code);
+      // Restore UI state if it was hidden
+      const isHidden = localStorage.getItem('r52_ui_' + m.id) === 'true';
+      if (isHidden) {
+        setTimeout(() => inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${m.id}', false);`), 500);
+      }
     } catch(e) {
       console.error('[Tuner52] Mod load fail', m.name, e);
       alert('❌ Failed to load: ' + m.name + '\nError: ' + e.message);
@@ -143,9 +154,36 @@
     } catch(e) {}
   })();
 
-  // 5. UI Injection
+  // 5. UI Injection & Built-in Social Hijack
   let taps = 0, tapT;
+  let socialsHijacked = false;
+
+  function hijackSocials() {
+    if (socialsHijacked) return;
+    const tSocial = document.querySelector('.tSocial');
+    if (!tSocial) return;
+    
+    // 🛑 PUT YOUR LINKS HERE
+    const MY_TIKTOK = 'https://www.tiktok.com/@YOUR_TIKTOK';
+    const MY_DISCORD = 'https://discord.gg/YOUR_INVITE';
+
+    const ig = tSocial.querySelector('a[href*="instagram.com"]');
+    const fb = tSocial.querySelector('a[href*="facebook.com"]');
+    if (ig) ig.remove();
+    if (fb) fb.remove();
+
+    const tt = tSocial.querySelector('a[href*="tiktok.com"]');
+    if (tt) { tt.href = MY_TIKTOK; tt.title = "TikTok"; }
+
+    const dc = tSocial.querySelector('a[href*="discord.gg"]') || tSocial.querySelector('a[href*="discord.com"]');
+    if (dc) { dc.href = MY_DISCORD; dc.title = "Discord"; }
+    
+    socialsHijacked = true;
+  }
+
   setInterval(() => {
+    hijackSocials(); // Built-in hijack
+
     const optsH = document.getElementById('optsH');
     const optCats = document.getElementById('optCats');
     const optRows = document.getElementById('optRows');
@@ -215,7 +253,7 @@
 
   function btn(txt, col, act) {
     const b = document.createElement('b'); b.textContent = txt;
-    b.style.cssText = `background:${col}; color:#fff; cursor:pointer; padding:6px 10px; border-radius:6px; font-size:11px; min-width:60px; text-align:center;`;
+    b.style.cssText = `background:${col}; color:#fff; cursor:pointer; padding:6px 10px; border-radius:6px; font-size:11px; min-width:60px; text-align:center; flex:1;`;
     b.onclick = act; return b;
   }
 
@@ -260,7 +298,6 @@
     mods = all.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
     c.innerHTML = ''; c.dataset.loaded = '1';
 
-    // UPDATE BANNER
     if (updateAvailable) {
       const banner = document.createElement('div');
       banner.style.cssText = 'background:#ef4444; color:#fff; padding:10px; border-radius:8px; font-size:12px; text-align:center; margin-bottom:5px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.3); transition: background 0.2s;';
@@ -304,20 +341,21 @@
         const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px';
         r.innerHTML = `<div style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;"><span style="font-size:13px; color:${m.isSecret?'#ef4444':'var(--ink)'};">${m.name}</span><span style="font-size:10px; color:var(--mute); text-transform:none;">${m.desc}</span></div>`;
 
-        const b = btn(isInstalled?'UNINSTALL':'INSTALL', isInstalled?'var(--red)':'var(--card3)', async (e) => {
+        const b = btn(isInstalled?'REMOVE':'INSTALL', isInstalled?'var(--red)':'var(--card3)', async (e) => {
           e.target.disabled = true;
           if (installed.includes(m.id)) {
             if (e.target.dataset.c === '1') {
               clearTimeout(e.target._t);
               installed = installed.filter(x => x !== m.id);
               delete active[m.id];
+              localStorage.removeItem('r52_ui_' + m.id);
               localStorage.setItem('r52_installed', JSON.stringify(installed));
               localStorage.setItem('r52_active', JSON.stringify(active));
               inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${m.id}'])window.__r52ModCleanup['${m.id}']();`);
               renderStore(p);
             } else {
               e.target.dataset.c = '1'; e.target.textContent = 'TAP AGAIN'; e.target.style.background = '#ef4444';
-              e.target._t = setTimeout(() => { e.target.disabled = false; e.target.dataset.c = '0'; e.target.textContent = 'UNINSTALL'; e.target.style.background = 'var(--red)'; }, 3000);
+              e.target._t = setTimeout(() => { e.target.disabled = false; e.target.dataset.c = '0'; e.target.textContent = 'REMOVE'; e.target.style.background = 'var(--red)'; }, 3000);
             }
           } else {
             e.target.textContent = 'LOADING...'; e.target.style.background = '#5a2a2a';
@@ -335,36 +373,81 @@
 
     function renderActive(p) {
       p.innerHTML = '';
+      
+      if (installed.length === 0) {
+        p.innerHTML = '<div style="color:var(--mute); text-align:center; font-size:13px; padding:20px;">No mods installed.</div>';
+        return;
+      }
+
       installed.forEach(id => {
         const m = mods.find(x => x.id === id) || { id, name: '⚠️ Unknown: ' + id, desc: 'No longer in store' };
-        const on = active[id] !== false;
-        const r = document.createElement('div'); r.className = 'orow'; r.style.padding = '10px'; r.style.borderColor = on ? '#4ade80' : 'var(--line)';
-        r.innerHTML = `<span style="font-size:13px; color:var(--ink);">${m.name}</span>`;
-        const w = document.createElement('div'); w.style.cssText = 'display:flex; gap:6px;';
+        const isOn = active[id] !== false;
+        const isUIHidden = localStorage.getItem('r52_ui_' + id) === 'true';
 
-        const tBtn = btn(on?'ON':'OFF', on?'#1f7d4a':'#5a2a2a', (e) => {
-          e.target.disabled = true;
-          active[id] = !on; localStorage.setItem('r52_active', JSON.stringify(active));
-          if(active[id]) loadMod(m); else inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${id}'])window.__r52ModCleanup['${id}']();`);
+        const card = document.createElement('div'); 
+        card.className = 'orow'; 
+        card.style.cssText = 'display:flex; flex-direction:column; padding:12px; gap:10px; cursor:pointer; border-color: ' + (isOn ? '#4ade80' : 'var(--line)');
+
+        // Header (Click to Expand)
+        const head = document.createElement('div');
+        head.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%;';
+        head.innerHTML = `<span style="font-size:14px; color:${isOn?'var(--ink)':'var(--mute)'}; font-weight:${isOn?'700':'400'};">${m.name}</span> <span style="font-size:10px; color:var(--mute); transition: transform 0.2s;" class="tx-arrow">▼</span>`;
+
+        // Expanded Options (Hidden by default)
+        const opts = document.createElement('div');
+        opts.style.cssText = 'display:none; gap:6px; width:100%; margin-top:5px;';
+
+        // UI Toggle Button
+        const uiBtn = btn(isUIHidden ? 'SHOW UI' : 'HIDE UI', 'var(--card3)', (e) => {
+          e.stopPropagation();
+          const newState = !isUIHidden;
+          localStorage.setItem('r52_ui_' + id, newState);
+          inject(`if(window.__r52ApplyUIToggle) window.__r52ApplyUIToggle('${id}', ${!newState});`);
           renderActive(p);
         });
 
-        const uBtn = btn('UNINSTALL', 'var(--card3)', (e) => {
+        // Main ON/OFF Button
+        const mainBtn = btn(isOn ? 'ON' : 'OFF', isOn ? '#1f7d4a' : '#5a2a2a', (e) => {
+          e.stopPropagation();
+          active[id] = !isOn;
+          localStorage.setItem('r52_active', JSON.stringify(active));
+          if(active[id]) loadMod(m); 
+          else inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${id}'])window.__r52ModCleanup['${id}']();`);
+          renderActive(p);
+        });
+
+        // Remove Button
+        const uBtn = btn('REMOVE', 'var(--card3)', (e) => {
+          e.stopPropagation();
           if (e.target.dataset.c === '1') {
             clearTimeout(e.target._t);
             installed = installed.filter(x=>x!==id);
             delete active[id];
+            localStorage.removeItem('r52_ui_' + id);
             localStorage.setItem('r52_installed', JSON.stringify(installed));
             localStorage.setItem('r52_active', JSON.stringify(active));
             inject(`if(window.__r52ModCleanup&&window.__r52ModCleanup['${id}'])window.__r52ModCleanup['${id}']();`);
             renderActive(p);
           } else {
             e.target.dataset.c = '1'; e.target.textContent = 'SURE?'; e.target.style.background = '#ef4444'; e.target.style.color = '#fff';
-            e.target._t = setTimeout(() => { e.target.dataset.c = '0'; e.target.textContent = 'UNINSTALL'; e.target.style.background = 'var(--card3)'; e.target.style.color = '#ef4444'; }, 3000);
+            e.target._t = setTimeout(() => { e.target.dataset.c = '0'; e.target.textContent = 'REMOVE'; e.target.style.background = 'var(--card3)'; e.target.style.color = '#ef4444'; }, 3000);
           }
         });
 
-        w.appendChild(tBtn); w.appendChild(uBtn); r.appendChild(w); p.appendChild(r);
+        opts.appendChild(uiBtn); 
+        opts.appendChild(mainBtn); 
+        opts.appendChild(uBtn);
+        card.appendChild(head); 
+        card.appendChild(opts);
+
+        // Expand/Collapse Logic
+        head.onclick = () => {
+          const isExpanded = opts.style.display === 'flex';
+          opts.style.display = isExpanded ? 'none' : 'flex';
+          head.querySelector('.tx-arrow').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+        };
+
+        p.appendChild(card);
       });
     }
   }
