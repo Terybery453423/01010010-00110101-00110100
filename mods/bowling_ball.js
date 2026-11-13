@@ -19,18 +19,18 @@
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Base vibrant blue color
-    ctx.fillStyle = '#2563eb'; 
+    // Base vibrant pink
+    ctx.fillStyle = '#ff6b9d'; 
     ctx.fillRect(0, 0, 512, 512);
 
-    // Add some "swirls" for a marble effect
-    ctx.strokeStyle = '#60a5fa'; 
+    // Add some "swirls" for a marble effect (Darker pinks)
+    ctx.strokeStyle = '#c81d5e'; 
     ctx.lineWidth = 20;
     ctx.beginPath();
     ctx.arc(256, 256, 200, 0, Math.PI * 2);
     ctx.stroke();
     
-    ctx.strokeStyle = '#93c5fd'; 
+    ctx.strokeStyle = '#9b1345'; 
     ctx.lineWidth = 10;
     ctx.beginPath();
     ctx.arc(200, 200, 150, 0, Math.PI * 2);
@@ -38,28 +38,30 @@
 
     // Glossy highlight (makes it look like a shiny bowling ball)
     const grad = ctx.createRadialGradient(200, 200, 10, 256, 256, 256);
-    grad.addColorStop(0, 'rgba(255,255,255,0.6)'); // Strong white highlight
+    grad.addColorStop(0, 'rgba(255,255,255,0.8)'); // Strong white highlight
     grad.addColorStop(0.5, 'rgba(255,255,255,0.0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.6)'); // Darker edges for 3D depth
+    grad.addColorStop(1, 'rgba(0,0,0,0.5)'); // Darker edges for 3D depth
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 512, 512);
 
-    // Draw the 3 finger holes
-    ctx.fillStyle = '#000000';
+    // Draw the 3 finger holes (Positioned at the equator to prevent oval stretching)
+    ctx.fillStyle = '#111111';
     ctx.shadowColor = '#000';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 8;
 
-    // Hole 1
+    // Center hole
     ctx.beginPath();
-    ctx.arc(256, 200, 25, 0, Math.PI * 2);
+    ctx.arc(256, 256, 20, 0, Math.PI * 2);
     ctx.fill();
-    // Hole 2
+    
+    // Left hole
     ctx.beginPath();
-    ctx.arc(220, 260, 25, 0, Math.PI * 2);
+    ctx.arc(216, 276, 20, 0, Math.PI * 2);
     ctx.fill();
-    // Hole 3
+    
+    // Right hole
     ctx.beginPath();
-    ctx.arc(292, 260, 25, 0, Math.PI * 2);
+    ctx.arc(296, 276, 20, 0, Math.PI * 2);
     ctx.fill();
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -115,8 +117,8 @@
     const geo = new THREE.SphereGeometry(150, 32, 32);
     const mat = new THREE.MeshStandardMaterial({
       map: createBowlingTexture(),
-      roughness: 0.1, // Very shiny
-      metalness: 0.8
+      roughness: 0.15, // Shiny
+      metalness: 0.6
     });
     
     ballMesh = new THREE.Mesh(geo, mat);
