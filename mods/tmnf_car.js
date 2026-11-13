@@ -8,14 +8,14 @@
   // ⚠️ CHANGE THIS to the actual URL of your .glb file on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/tmnf_car.glb';
 
-window.__r52rotX = -0.1916; // -0.2416 + 0.10
-window.__r52rotY = 0.6084;
+window.__r52rotX = -0.1916; 
+window.__r52rotY = 0.55;
 window.__r52rotZ = 0.1084;
 window.__r52baked = {
   k: 94.70,
-  x: -25.53, // Moved further left (decreased by 1)
+  x: -19.53,
   y: 43.00, 
-  z: 365.90  // Kept exactly where it was
+  z: 365.90
 };
 
   let carGroup = null;
