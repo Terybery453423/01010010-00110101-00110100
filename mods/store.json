@@ -21,10 +21,18 @@
     "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/bridge.js"
   },
   {
-  "id": "hitbox",
-  "name": "Hitbox Viewer",
-  "desc": "Draws a neon wireframe box around your car to show the exact 3D hitbox.",
-  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/hitbox.js"
+    "id": "tmnf_car",
+    "name": "Trackmania Car",
+    "desc": "Replaces the default car with the classic Trackmania Stadium Car.",
+    "author": "Terybery453423",
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/tmnf_car.js"
+  },
+  {
+    "id": "hitbox",
+    "name": "Hitbox Viewer",
+    "desc": "Draws a neon wireframe box around your car to show the exact 3D hitbox.",
+    "author": "Terybery453423",
+    "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/hitbox.js"
   },
   {
   "id": "no_dust",
