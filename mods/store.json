@@ -21,10 +21,10 @@
     "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/bridge.js"
   },
   {
-  "id": "bowling_ball",
-  "name": "Bowling Ball Car",
-  "desc": "Turns your car into a giant rolling bowling ball (Visual only).",
-  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/bowling_ball.js"
+  "id": "hitbox",
+  "name": "Hitbox Viewer",
+  "desc": "Draws a neon wireframe box around your car to show the exact 3D hitbox.",
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/hitbox.js"
   },
   {
   "id": "no_dust",
