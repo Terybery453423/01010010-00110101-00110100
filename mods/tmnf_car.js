@@ -8,16 +8,16 @@
   // ⚠️ CHANGE THIS to the actual URL of your .glb file on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/tmnf_car.glb';
 
-  // YOUR EXACT TUNED OFFSETS
-  window.__r52rotX = -0.2416;
-  window.__r52rotY = 0.6084;
-  window.__r52rotZ = 0.1084;
-  window.__r52baked = {
-    k: 94.70,
-    x: -19.53,
-    y: 46.00,
-    z: 365.90
-  };
+// YOUR EXACT TUNED OFFSETS (Adjusted Tilt & Height)
+window.__r52rotX = -0.1416; // -0.2416 + 0.10
+window.__r52rotY = 0.6084;
+window.__r52rotZ = 0.1084;
+window.__r52baked = {
+  k: 94.70,
+  x: -19.53,
+  y: 43.00, // 46.00 - 3
+  z: 365.90
+};
 
   let carGroup = null;
   let originalMesh = null;
