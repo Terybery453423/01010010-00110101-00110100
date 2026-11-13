@@ -9,7 +9,7 @@
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/tmnf_car.glb';
 
 // YOUR EXACT TUNED OFFSETS (Adjusted Tilt & Height)
-window.__r52rotX = -2.1916; // -0.2416 + 0.10
+window.__r52rotX = -1.1916; // -0.2416 + 0.10
 window.__r52rotY = 0.6084;
 window.__r52rotZ = 0.1084;
 window.__r52baked = {
