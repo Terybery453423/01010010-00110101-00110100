@@ -1,4 +1,4 @@
-// == Golden Gate Bridge Mod ==
+// == Golden Gate Bridge Mod (Auto-Load) ==
 (function(){
   if (window.__r52_bridgeMod) return;
   window.__r52_bridgeMod = true;
@@ -35,6 +35,10 @@
   var intervalId = setInterval(function(){
     var sc = getScene(); if (!sc) return;
     var cg = findCarGroup(sc); if (!cg) return;
+    
+    // If the model hasn't downloaded yet, skip
+    if (!window.__r52bridgeStash) return;
+
     var scaled = null;
     for (var j = 0; j < cg.children.length; j++) {
       var ch = cg.children[j];
@@ -42,7 +46,6 @@
     }
     if (!scaled) scaled = cg.children[0];
     if (!scaled) return;
-    if (!window.__r52bridgeStash) return;
 
     if (!window.__r52bridgeBaked) {
       try {
@@ -60,7 +63,7 @@
         var center = box2.getCenter(new THREE.Vector3());
         window.__r52bridgeBaked = { k: k, x: -center.x, y: -box2.min.y, z: -center.z };
         model.position.set(window.__r52bridgeBaked.x, window.__r52bridgeBaked.y, window.__r52bridgeBaked.z);
-        window.__r52bridgeSwapMsg = "baked k=" + k.toFixed(4);
+        window.__r52bridgeSwapMsg = "baked";
       } catch(e) { window.__r52bridgeSwapMsg = "bake err: " + e.message; return; }
     }
     var b = window.__r52bridgeBaked;
@@ -85,8 +88,39 @@
       model2.scale.set(b.k, b.k, b.k); model2.position.set(b.x, b.y, b.z);
       wrap.add(model2); cg.add(wrap); scaled.visible = false;
       window.__r52bridgeGroup = wrap; window.__r52bridgeSwapMsg = "live";
+      console.log("[Mod] Bridge is now active!");
     } catch(e) { window.__r52bridgeSwapMsg = "err: " + e.message; }
   }, 300);
+
+  // --- AUTO-DOWNLOAD LOGIC ---
+  function autoLoadBridge() {
+    if (window.__r52bridgeStash) return;
+    console.log("[Mod] Requesting Bridge model...");
+    
+    if (window.__r52DownloadFile) {
+      window.__r52DownloadFile(BRIDGE_URL, 'bridge', function(dataUrl) {
+        if (!window.THREE || !THREE.GLTFLoader) { 
+          console.warn("[Mod] THREE.GLTFLoader not found. Make sure the GLB Loader mod is installed."); 
+          return; 
+        }
+        var loader = new THREE.GLTFLoader();
+        loader.load(dataUrl, function(gltf){
+          window.__r52bridgeStash = gltf.scene;
+          window.__r52bridgeSwapMsg = "queued";
+          console.log("[Mod] Bridge parsed and queued for swap.");
+        }, undefined, function(err){
+          console.error("[Mod] Failed to parse Bridge GLB:", err);
+        });
+      }, function(err) {
+        console.error("[Mod] Failed to download Bridge:", err);
+      });
+    } else {
+      console.error("[Mod] Hub API not found. Cannot download model.");
+    }
+  }
+
+  // Wait 1.5 seconds for the game & GLTF Loader to initialize, then fire
+  setTimeout(autoLoadBridge, 1500);
 
   window.__r52unswapBridge = function(){
     if (window.__r52bridgeGroup && window.__r52bridgeGroup.parent) window.__r52bridgeGroup.parent.remove(window.__r52bridgeGroup);
@@ -94,52 +128,12 @@
     window.__r52bridgeSwapMsg = "idle";
   };
 
-  var chip = document.createElement('div');
-  chip.id = 'r52bridge_chip';
-  chip.style.cssText = 'position:fixed;right:6px;bottom:260px;z-index:9999;padding:9px 14px;background:#a0472f;color:#fff;font:700 11px monospace;border-radius:8px;cursor:pointer;text-align:center;min-width:130px;border:1px solid #d88;-webkit-tap-highlight-color:transparent';
-  chip.textContent = '🌉 LOAD BRIDGE';
-  document.body.appendChild(chip);
-
-  chip.onclick = function(){
-    if (window.__r52bridgeStash) return;
-    chip.textContent = '⏳ REQUESTING';
-    if (window.__r52DownloadFile) {
-      window.__r52DownloadFile(BRIDGE_URL, 'bridge', function(dataUrl) {
-        chip.textContent = '⏳ PARSING';
-        if (!window.THREE || !THREE.GLTFLoader) { chip.textContent = '❌ NO LOADER'; return; }
-        var loader = new THREE.GLTFLoader();
-        loader.load(dataUrl, function(gltf){
-          window.__r52bridgeStash = gltf.scene;
-          window.__r52bridgeSwapMsg = "queued";
-        }, undefined, function(err){
-          chip.textContent = '❌ PARSE ERR';
-        });
-      }, function(err) {
-        chip.textContent = '❌ ' + err;
-      });
-    } else {
-      chip.textContent = '❌ NO HUB API';
-    }
-  };
-
-  var wiped = false;
-  var checkInterval = setInterval(function(){
-    if (wiped) return;
-    if (window.__r52bridgeSwapMsg === 'live') {
-      wiped = true;
-      chip.textContent = '✓ BRIDGE ACTIVE';
-      chip.style.background = '#2a7f4f'; chip.style.borderColor = '#8f8';
-      setTimeout(function(){ if (chip.parentNode) chip.parentNode.removeChild(chip); }, 2000);
-    }
-  }, 600);
-
   // --- NATIVE CLEANUP REGISTRY ---
   window.__r52ModCleanup = window.__r52ModCleanup || {};
   window.__r52ModCleanup['bridge'] = function() {
-    clearInterval(intervalId); clearInterval(checkInterval);
-    if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
+    clearInterval(intervalId);
     if (window.__r52unswapBridge) window.__r52unswapBridge();
-    delete window.__r52_bridgeMod; // Fixes the reinstall bug!
+    delete window.__r52_bridgeMod;
     console.log("[Mod] Bridge cleaned up natively.");
   };
 
