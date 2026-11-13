@@ -1,27 +1,22 @@
-// == Hitbox Viewer Mod ==
+// == Hitbox Viewer Mod (True Physics Box) ==
 (function(){
   if (window.__r52_hitbox) return;
   window.__r52_hitbox = true;
 
-  console.log("[Mod] Hitbox Viewer loaded");
+  console.log("[Mod] True Hitbox Viewer loaded");
 
-  let carGroup = null;
-  let originalMesh = null;
   let hitboxGroup = null;
   let checkInterval = null;
 
-  // 1. Wait for the game to load
   checkInterval = setInterval(() => {
     if (typeof car === 'undefined' || !car) return;
     if (typeof THREE === 'undefined') return;
 
-    // Find the scene
     let sc = null;
     try { if (typeof cam !== "undefined" && cam) { let p = cam; while (p.parent) p = p.parent; if (p.type === "Scene") sc = p; } } catch(e){}
-    if (!sc) try { if (typeof sky !== "undefined" && sky) { let p = sky; while (p.parent) p = p.parent; if (p.type === "Scene") sc = p; } } catch(e){}
     if (!sc) return;
 
-    // Find the car group
+    let carGroup = null;
     for (let i = sc.children.length - 1; i >= 0; i--) {
       const c = sc.children[i];
       if (c.type === "Group" && c.userData && c.userData.base) {
@@ -31,37 +26,43 @@
     }
     if (!carGroup) return;
 
-    // Find the original mesh (scaled to 0.01)
+    // FIND THE ORIGINAL HIDDEN MESH (The true physics box)
+    let originalMesh = null;
     for (let j = 0; j < carGroup.children.length; j++) {
       const ch = carGroup.children[j];
+      // Look for the group scaled to 0.01
       if (ch.type === "Group" && ch.scale && Math.abs(ch.scale.x - 0.01) < 0.001) {
         originalMesh = ch;
         break;
       }
     }
-    if (!originalMesh) originalMesh = carGroup.children[0];
-
-    if (originalMesh) {
-      clearInterval(checkInterval);
-      buildHitbox();
-    }
-  }, 200);
-
-  function buildHitbox() {
-    if (!originalMesh) return;
     
-    if (hitboxGroup && hitboxGroup.parent) {
-      hitboxGroup.parent.remove(hitboxGroup);
+    // If the original mesh doesn't exist (some custom loaders delete it), we can't draw the physics box
+    if (!originalMesh) {
+      if (!document.getElementById('r52_hb_err')) {
+         console.warn("Original physics mesh not found. Cannot draw true hitbox.");
+         const err = document.createElement('div');
+         err.id = 'r52_hb_err';
+         err.style.cssText = 'position:fixed;top:10px;left:10px;background:red;color:white;padding:5px;font-size:10px;z-index:9999;';
+         err.textContent = "Hitbox error: Original mesh missing";
+         document.body.appendChild(err);
+      }
+      return;
     }
 
-    // Force update world matrices to ensure accurate calculation
-    originalMesh.updateMatrixWorld(true);
+    clearInterval(checkInterval);
+    buildHitbox(carGroup, originalMesh);
+  }, 500);
 
-    // 1. Calculate world bounding box
+  function buildHitbox(carGroup, originalMesh) {
+    if (hitboxGroup && hitboxGroup.parent) hitboxGroup.parent.remove(hitboxGroup);
+
+    originalMesh.updateMatrixWorld(true);
+    
+    // Calculate the box of the hidden original mesh
     const worldBox = new THREE.Box3().setFromObject(originalMesh);
     
-    // 2. Convert the 8 corners of the world box into the local space of the originalMesh
-    // This perfectly accounts for any scaling (0.01) or offset the game applies.
+    // Convert to the carGroup's local space to avoid offset bugs
     const localBox = new THREE.Box3();
     const min = worldBox.min, max = worldBox.max;
     const corners = [
@@ -76,19 +77,18 @@
     ];
     
     corners.forEach(c => {
-        originalMesh.worldToLocal(c);
+        carGroup.worldToLocal(c);
         localBox.expandByPoint(c);
     });
     
     const size = localBox.getSize(new THREE.Vector3());
     const center = localBox.getCenter(new THREE.Vector3());
 
-    // 3. Create geometry (it will inherit the 0.01 scale from originalMesh)
     const geo = new THREE.BoxGeometry(size.x, size.y, size.z);
     const edges = new THREE.EdgesGeometry(geo);
     const lineMat = new THREE.LineBasicMaterial({ 
-      color: 0x00ff00, // Neon green
-      depthTest: false,
+      color: 0x00ff00, 
+      depthTest: false, 
       transparent: true,
       opacity: 0.8
     });
@@ -99,19 +99,20 @@
     hitboxGroup.position.copy(center);
     hitboxGroup.add(line);
 
-    // 4. Attach directly to originalMesh so it inherits all offsets/rotations
-    originalMesh.add(hitboxGroup);
+    // Attach directly to the carGroup so it follows the car perfectly
+    carGroup.add(hitboxGroup);
 
-    console.log("[Mod] Hitbox drawn. Size:", size);
+    console.log("[Mod] True hitbox drawn. Size:", size);
   }
 
-  // --- NATIVE CLEANUP REGISTRY ---
   window.__r52ModCleanup = window.__r52ModCleanup || {};
   window.__r52ModCleanup['hitbox'] = function() {
     clearInterval(checkInterval);
     if (hitboxGroup && hitboxGroup.parent) {
       hitboxGroup.parent.remove(hitboxGroup);
     }
+    const err = document.getElementById('r52_hb_err');
+    if (err) err.remove();
     delete window.__r52_hitbox;
     console.log("[Mod] Hitbox Viewer cleaned up natively.");
   };
