@@ -13,9 +13,9 @@ window.__r52rotY = 0.6084;
 window.__r52rotZ = 0.1084;
 window.__r52baked = {
   k: 94.70,
-  x: -19.53,
-  y: 43.00, // 46.00 - 3
-  z: 365.90
+  x: -25.53, // Moved further left (decreased by 1)
+  y: 43.00, 
+  z: 365.90  // Kept exactly where it was
 };
 
   let carGroup = null;
