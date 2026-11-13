@@ -8,7 +8,7 @@
   // ⚠️ CHANGE THIS to the actual URL of your .glb file on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/tmnf_car.glb';
 
-window.__r52rotX = -0.1916; 
+window.__r52rotX = -1.1916; 
 window.__r52rotY = 0.58;
 window.__r52rotZ = 0.1084;
 window.__r52baked = {
