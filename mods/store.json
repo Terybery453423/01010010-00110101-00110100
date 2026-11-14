@@ -28,6 +28,13 @@
     "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/tmnf_car.js"
   },
   {
+  "id": "redbull_car",
+  "name": "Red Bull RB16 F1",
+  "desc": "Replaces the default car with the Red Bull RB16 Formula 1 car.",
+  "author": "Terybery453423",
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/redbull_car.js"
+  },
+  {
     "id": "hitbox",
     "name": "Hitbox Viewer",
     "desc": "Draws a neon wireframe box around your car to show the exact 3D hitbox.",
