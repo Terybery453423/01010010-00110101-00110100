@@ -13,10 +13,10 @@
   window.__r52rbRotY = 0.6084;
   window.__r52rbRotZ = 0.1084;
   window.__r52rbBaked = {
-    k: 94.70,
-    x: -19.53,
-    y: 43.00,
-    z: 365.90
+    k: 0,
+    x: 0,
+    y: 0,
+    z: 0
   };
 
   function getScene(){
