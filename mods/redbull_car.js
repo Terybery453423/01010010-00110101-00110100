@@ -10,7 +10,7 @@
 
   // YOUR EXACT TUNED OFFSETS
   window.__r52rbRotX = 0.0000; 
-  window.__r52rbRotY = -3.1416; // Turned 90° more
+  window.__r52rbRotY = 0.0000;
   window.__r52rbRotZ = 0.0000;
   window.__r52rbBaked = {
     k: 16.65,
