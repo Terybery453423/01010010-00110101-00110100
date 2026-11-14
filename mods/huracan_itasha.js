@@ -5,7 +5,6 @@
 
   console.log("[Mod] Lamborghini Huracan Itasha loading...");
 
-  // ⚠️ CHANGE THIS if your file name is different on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/huracan_itasha.glb';
 
   // ⚠️ TUNE THESE WITH YOUR TUNER SCRIPT
