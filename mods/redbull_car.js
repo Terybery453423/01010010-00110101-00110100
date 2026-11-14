@@ -5,7 +5,6 @@
 
   console.log("[Mod] Red Bull RB16 loading...");
 
-  // ⚠️ CHANGE THIS to the actual URL of your .glb file on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/rb16.glb';
 
   // YOUR EXACT TUNED OFFSETS
@@ -14,7 +13,7 @@
   window.__r52rbRotZ = 0.0000;
   window.__r52rbBaked = {
     k: 16.65,
-    x: 40352.13,
+    x: 40359.93,
     y: -2456.30,
     z: 21229.67
   };
