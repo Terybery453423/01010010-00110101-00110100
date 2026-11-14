@@ -35,6 +35,13 @@
   "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/redbull_car.js"
   },
   {
+  "id": "huracan_itasha",
+  "name": "Lamborghini Huracan GT3 Itasha",
+  "desc": "A GT3 race car covered in anime decals.",
+  "author": "Terybery453423",
+  "url": "https://raw.githubusercontent.com/Terybery453423/Tuner52/main/mods/huracan_itasha.js"
+  }, 
+  {
     "id": "hitbox",
     "name": "Hitbox Viewer",
     "desc": "Draws a neon wireframe box around your car to show the exact 3D hitbox.",
