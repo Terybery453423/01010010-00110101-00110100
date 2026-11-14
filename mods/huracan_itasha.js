@@ -1,17 +1,22 @@
-// == Lamborghini Huracan GT3 Itasha Mod (Debug) ==
+// == Lamborghini Huracan GT3 Itasha Mod (Standalone) ==
 (function(){
   if (window.__r52_huracanItasha) return;
   window.__r52_huracanItasha = true;
 
-  console.log("1. [Mod] Lamborghini Huracan Itasha loading...");
+  console.log("[Mod] Lamborghini Huracan Itasha loading...");
 
-  // ⚠️ MAKE SURE THIS IS THE RAW LINK (raw.githubusercontent.com)
-  const CAR_URL = 'https://raw.githubusercontent.com/Terybery453423/Tuner52/main/custom_cars/huracan_itasha.glb';
+  const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/huracan_itasha.glb';
 
+  // ⚠️ TUNE THESE WITH YOUR TUNER SCRIPT
   window.__r52huracanRotX = 0.0000; 
   window.__r52huracanRotY = 0.0000;
   window.__r52huracanRotZ = 0.0000;
-  window.__r52huracanBaked = { k: 100, x: 0, y: 0, z: 0 };
+  window.__r52huracanBaked = {
+    k: 100,
+    x: 0,
+    y: 0,
+    z: 0
+  };
 
   function getScene(){
     if (window.__r52sceneCached && window.__r52sceneCached.type === "Scene") return window.__r52sceneCached;
@@ -29,48 +34,25 @@
     return null;
   }
 
-  // --- NATIVE TAMPERMONKEY DOWNLOAD ---
   function downloadModel() {
-    console.log("2. [Mod] Starting download...");
-    const xhr = (typeof GM_xmlhttpRequest !== 'undefined') ? GM_xmlhttpRequest : (window.GM_xmlhttpRequest || window.unsafeWindow?.GM_xmlhttpRequest);
-    
-    if (!xhr) {
-        console.error("❌ [Mod] GM_xmlhttpRequest is missing! Are you running this outside Tampermonkey?");
-        return;
-    }
-
-    xhr({
-        method: 'GET',
-        url: CAR_URL,
-        responseType: 'arraybuffer',
-        onload: function(r) {
-            if (r.status === 200) {
-                console.log("3. [Mod] Download complete! Parsing...");
-                if (!window.THREE || !window.THREE.GLTFLoader) {
-                    console.error("❌ [Mod] THREE.GLTFLoader is missing. Activate the GLB loader mod!");
-                    return;
-                }
-                
-                var loader = new window.THREE.GLTFLoader();
-                // GLTFLoader parses ArrayBuffers natively!
-                loader.parse(r.response, '', function(gltf) {
-                    window.__r52huracanStash = gltf.scene;
-                    console.log("4. ✅ [Mod] Huracan model parsed successfully!");
-                }, function(err) {
-                    console.error("❌ [Mod] Failed to parse GLB:", err);
-                });
-            } else {
-                console.error("❌ [Mod] Download failed. HTTP Status:", r.status);
-            }
-        },
-        onerror: function(err) {
-            console.error("❌ [Mod] Network error:", err);
+    if (window.__r52DownloadFile) {
+      window.__r52DownloadFile(CAR_URL, 'huracan', function(dataUrl) {
+        if (!window.THREE || !THREE.GLTFLoader) { 
+          console.warn("[Mod] THREE.GLTFLoader missing."); 
+          return; 
         }
-    });
+        var loader = new THREE.GLTFLoader();
+        loader.load(dataUrl, function(gltf){
+          window.__r52huracanStash = gltf.scene;
+          console.log("[Mod] Huracan Itasha model parsed.");
+        }, undefined, function(err){
+          console.error("[Mod] Failed to parse GLB:", err);
+        });
+      }, function(err) {
+        console.error("[Mod] Failed to download model:", err);
+      });
+    }
   }
-
-  // Start download 1 second after script loads
-  setTimeout(downloadModel, 1000);
 
   var intervalId = setInterval(function(){
     var sc = getScene(); if (!sc) return;
@@ -84,7 +66,6 @@
     if (!scaled) scaled = cg.children[0];
     if (!scaled) return;
 
-    // If the model hasn't downloaded yet, skip
     if (!window.__r52huracanStash) return;
 
     var existing = null;
@@ -103,7 +84,6 @@
     }
 
     try {
-      console.log("5. [Mod] Swapping custom model into the scene!");
       var wrap = new THREE.Group();
       wrap.name = "__r52huracanWrap";
       wrap.position.copy(scaled.position);
@@ -125,10 +105,14 @@
       scaled.visible = false;
       window.__r52huracanGroup = wrap;
       window.__r52huracanModel = model;
+      
+      console.log("[Mod] Huracan Itasha swapped in!");
     } catch(e) { 
-      console.error("❌ [Mod] Swap error:", e); 
+      console.error("[Mod] Swap error:", e); 
     }
   }, 300);
+
+  setTimeout(downloadModel, 1000);
 
   window.__r52ModCleanup = window.__r52ModCleanup || {};
   window.__r52ModCleanup['huracan_itasha'] = function() {
