@@ -8,15 +8,15 @@
   // ⚠️ CHANGE THIS to the actual URL of your .glb file on GitHub
   const CAR_URL = 'https://cdn.jsdelivr.net/gh/Terybery453423/Tuner52@main/custom_cars/rb16.glb';
 
-  // Baked in from the Trackmania offsets
-  window.__r52rbRotX = -0.1916; 
-  window.__r52rbRotY = 0.6084;
-  window.__r52rbRotZ = 0.1084;
+  // YOUR EXACT TUNED OFFSETS
+  window.__r52rbRotX = 0.0000; 
+  window.__r52rbRotY = -3.1416; // Turned 90° more
+  window.__r52rbRotZ = 0.0000;
   window.__r52rbBaked = {
-    k: 0,
-    x: 0,
-    y: 0,
-    z: 0
+    k: 16.65,
+    x: 40352.13,
+    y: -2456.30,
+    z: 21229.67
   };
 
   function getScene(){
